@@ -7,7 +7,7 @@ using MonoRemoteDebugger.VSExtension.Settings;
 
 namespace MonoRemoteDebugger.VSExtension.Views
 {
-    public class ServersFoundViewModel
+    public class ServersFoundViewModel : IDisposable
     {
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
@@ -60,5 +60,36 @@ namespace MonoRemoteDebugger.VSExtension.Views
 
             cts.Cancel();
         }
+
+        #region IDisposable Members
+        protected bool disposed = false;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+                return;
+
+            if (disposing)
+            {
+                //Dispose managed resources
+                cts.Dispose();
+            }
+
+            //Dispose unmanaged resources here.
+
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ServersFoundViewModel()
+        {
+            Dispose(false);
+        }
+        #endregion
+
     }
 }

@@ -27,7 +27,7 @@ namespace MonoRemoteDebugger.VSExtension
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
     [Guid(GuidList.guidMonoDebugger_VS2013PkgString)]
-    public sealed class MonoDebuggerPackage : Package
+    public sealed class MonoDebuggerPackage : Package, IDisposable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private MonoVisualStudioExtension monoExtension;
@@ -202,5 +202,38 @@ namespace MonoRemoteDebugger.VSExtension
                 }
             }
         }
+
+        #region IDisposable Members
+        private bool disposed = false;
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (this.disposed)
+                return;
+
+            if (disposing)
+            {
+                //Dispose managed resources
+                this.server.Dispose();
+            }
+
+            //Dispose unmanaged resources here.
+
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~MonoDebuggerPackage()
+        {
+            Dispose(false);
+        }
+        #endregion
+
     }
 }
