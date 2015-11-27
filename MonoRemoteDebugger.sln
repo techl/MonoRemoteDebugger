@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7AA95CC-1EAA-4E4B-81BE-CF921C5F219F}"
 	ProjectSection(SolutionItems) = preProject
 		AssemblyInfo.cs = AssemblyInfo.cs
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoRemoteDebugger.Server", "MonoRemoteDebugger.Server\MonoRemoteDebugger.Server.csproj", "{134655A3-EF22-4E4A-AE8D-9EE1282733A7}"
