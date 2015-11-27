@@ -3,8 +3,10 @@ MonoRemoteDebugger
 
 MonoRemoteDebugger enables linux remote debugging using Visual Studio 2015.
 
-This project is from MonoDebugger https://github.com/giessweinapps/MonoDebugger<br>
-Thanks to Christian Giesswein.<br>
+This project is from MonoDebugger https://github.com/giessweinapps/MonoDebugger
+
+Thanks to Christian Giesswein.
+
 If Christian Giesswein releases new version, this project will be removed.
 
 Usage
