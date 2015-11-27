@@ -13,7 +13,7 @@ Run MonoRemoteDebugger.Server on Linux machine.
 
 >mono MonoRemoteDebugger.Server.exe
 
-<br><br>
+<br>
 
 
 Install MonoRemoteDebugger extension.
