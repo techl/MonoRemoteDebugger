@@ -12,9 +12,9 @@ Usage
 Run MonoRemoteDebugger.Server on linux.
 > mono MonoRemoteDebugger.Server.exe
 
-Install MonoRemoteDebugger.VSExtension.vsix.
-Run Visual Studio 2015.
-On the toolbar menu, click MonoRemoteDebugger -> Debug with Mono (remote)
-Type remote IP on the dialog.
-Click Connect button.
-Enjoy your debugging.
+Install MonoRemoteDebugger.VSExtension.vsix.<br>
+Run Visual Studio 2015.<br>
+On the toolbar menu, click MonoRemoteDebugger -> Debug with Mono (remote)<br>
+Type remote IP on the dialog.<br>
+Click Connect button.<br>
+Enjoy your debugging.<br>
