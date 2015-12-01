@@ -56,7 +56,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
 
         public async Task WaitForAnswerAsync()
         {
-            Task delay = Task.Delay(30000);
+            Task delay = Task.Delay(10000);
             Task msg = await Task.WhenAny(communication.ReceiveAsync(), delay);
 
             if (msg is Task<MessageBase>)
