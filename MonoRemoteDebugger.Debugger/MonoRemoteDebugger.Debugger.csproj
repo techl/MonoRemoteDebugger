@@ -76,6 +76,10 @@
       <HintPath>..\packages\Microsoft.CodeAnalysis.Workspaces.Common.1.0.0\lib\net45\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.MICore">
+      <HintPath>..\Assemblies\Microsoft.MICore.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Debugger.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Mono.Debugger.Soft">
@@ -123,32 +127,29 @@
     <Compile Include="Contracts\IDebugSession.cs" />
     <Compile Include="DebuggedMonoProcess.cs" />
     <Compile Include="DebuggedMonoThread.cs" />
+    <Compile Include="MIDebugEngine\AD7.Impl\AD7Enums.cs" />
+    <Compile Include="MIDebugEngine\AD7.Impl\AD7ErrorBreakpoint.cs" />
+    <Compile Include="MIDebugEngine\AD7.Impl\AD7ErrorBreakpointResolution.cs" />
+    <Compile Include="MIDebugEngine\AD7.Impl\AD7Events.cs" />
+    <Compile Include="MIDebugEngine\AD7.Impl\EngineConstants.cs" />
+    <Compile Include="MIDebugEngine\Engine.Impl\Structures.cs" />
     <Compile Include="RoslynHelper.cs" />
     <Compile Include="StatementRange.cs" />
-    <Compile Include="VisualStudio\MonoBoundBreakpoint.cs" />
+    <Compile Include="VisualStudio\AD7BoundBreakpoint.cs" />
     <Compile Include="VisualStudio\MonoBoundBreakpointEnumerator.cs" />
     <Compile Include="VisualStudio\MonoBreakpointLocation.cs" />
+    <Compile Include="VisualStudio\MonoDebuggerEvents.cs" />
     <Compile Include="VisualStudio\MonoDocument.cs" />
     <Compile Include="VisualStudio\MonoEnumerator.cs" />
     <Compile Include="VisualStudio\MonoFrameInfoEnum.cs" />
-    <Compile Include="VisualStudio\MonoPendingBreakpoint.cs" />
+    <Compile Include="VisualStudio\AD7PendingBreakpoint.cs" />
     <Compile Include="VisualStudio\MonoProcess.cs" />
     <Compile Include="VisualStudio\AsyncDispatcher.cs" />
     <Compile Include="VisualStudio\MonoGuids.cs" />
-    <Compile Include="Events\BreakPointEvent.cs" />
-    <Compile Include="Events\BreakPointHitEvent.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="Enums\SteppingTypeEnum.cs" />
-    <Compile Include="Events\AsynchronousEvent.cs" />
-    <Compile Include="Events\DebugEntryPointEvent.cs" />
-    <Compile Include="Events\EngineCreateEvent.cs" />
-    <Compile Include="Events\LoadCompleteEvent.cs" />
-    <Compile Include="Events\ProgramCreateEvent.cs" />
-    <Compile Include="Events\ProgramDestroyedEvent.cs" />
-    <Compile Include="Events\StoppingEvent.cs" />
-    <Compile Include="VisualStudio\MonoDebuggerEvents.cs" />
     <Compile Include="VisualStudio\MonoDocumentContext.cs" />
-    <Compile Include="VisualStudio\MonoEngine.cs" />
+    <Compile Include="VisualStudio\AD7Engine.cs" />
     <Compile Include="VisualStudio\MonoProgramNode.cs" />
     <Compile Include="VisualStudio\MonoProgramProvider.cs" />
     <Compile Include="VisualStudio\MonoProperty.cs" />
@@ -157,8 +158,6 @@
     <Compile Include="VisualStudio\MonoThread.cs" />
     <Compile Include="TextPosition.cs" />
     <Compile Include="TypeSummary.cs" />
-    <Compile Include="VisualStudio\StepCompleteEvent.cs" />
-    <Compile Include="VisualStudio\ThreadCreateEvent.cs" />
     <Compile Include="VisualStudio\TrivialMonoExpression.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +168,7 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

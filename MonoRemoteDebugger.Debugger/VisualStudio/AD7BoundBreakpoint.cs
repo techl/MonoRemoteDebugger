@@ -4,12 +4,12 @@ using Microsoft.VisualStudio.Debugger.Interop;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class MonoBoundBreakpoint : IDebugBoundBreakpoint2, IDebugBreakpointResolution2
+    internal class AD7BoundBreakpoint : IDebugBoundBreakpoint2, IDebugBreakpointResolution2
     {
-        private readonly MonoEngine _engine;
-        private readonly MonoPendingBreakpoint _pendingBreakpoint;
+        private readonly AD7Engine _engine;
+        private readonly AD7PendingBreakpoint _pendingBreakpoint;
 
-        public MonoBoundBreakpoint(MonoEngine engine, MonoPendingBreakpoint pendingBreakpoint)
+        public AD7BoundBreakpoint(AD7Engine engine, AD7PendingBreakpoint pendingBreakpoint)
         {
             _engine = engine;
             _pendingBreakpoint = pendingBreakpoint;
