@@ -6,10 +6,10 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     internal class MonoBoundBreakpoint : IDebugBoundBreakpoint2, IDebugBreakpointResolution2
     {
-        private readonly MonoEngine _engine;
+        private readonly AD7Engine _engine;
         private readonly MonoPendingBreakpoint _pendingBreakpoint;
 
-        public MonoBoundBreakpoint(MonoEngine engine, MonoPendingBreakpoint pendingBreakpoint)
+        public MonoBoundBreakpoint(AD7Engine engine, MonoPendingBreakpoint pendingBreakpoint)
         {
             _engine = engine;
             _pendingBreakpoint = pendingBreakpoint;

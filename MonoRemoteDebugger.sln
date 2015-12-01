@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7AA95CC-1EAA-4E4B-81BE-CF921C5F219F}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,6 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoRemoteDebugger.VSExtens
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoRemoteDebugger.Debugger", "MonoRemoteDebugger.Debugger\MonoRemoteDebugger.Debugger.csproj", "{C99840F2-29F7-44FC-A152-3CDD7FC41B21}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", "{866CF2EE-574D-49C6-89EB-637B56693D24}"
+	ProjectSection(SolutionItems) = preProject
+		Assemblies\Microsoft.MICore.dll = Assemblies\Microsoft.MICore.dll
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -15,7 +15,7 @@ namespace MonoRemoteDebugger.Debugger
     public class DebuggedMonoProcess
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private readonly MonoEngine _engine;
+        private readonly AD7Engine _engine;
         private readonly IPAddress _ipAddress;
         private readonly List<MonoPendingBreakpoint> _pendingBreakpoints = new List<MonoPendingBreakpoint>();
         private readonly Dictionary<string, TypeSummary> _types = new Dictionary<string, TypeSummary>();
@@ -28,7 +28,7 @@ namespace MonoRemoteDebugger.Debugger
         private bool isStepping;
         private IDebugSession session;
 
-        public DebuggedMonoProcess(MonoEngine engine, IPAddress ipAddress)
+        public DebuggedMonoProcess(AD7Engine engine, IPAddress ipAddress)
         {
             _engine = engine;
             _ipAddress = ipAddress;
@@ -64,7 +64,7 @@ namespace MonoRemoteDebugger.Debugger
             if (set.Events.OfType<VMStartEvent>().Any())
             {
                 _mainThread = new MonoThread(this, _engine, set.Events[0].Thread);
-                _engine.Events.ThreadStarted(_mainThread);
+                _engine.Callback.ThreadStarted(_mainThread);
 
                 Task.Factory.StartNew(ReceiveThread, TaskCreationOptions.LongRunning);
             }
@@ -138,7 +138,7 @@ namespace MonoRemoteDebugger.Debugger
 
         private void HandleStep(StepEvent stepEvent)
         {
-            _engine.Events.StepCompleted(_mainThread);
+            _engine.Callback.StepCompleted(_mainThread);
             logger.Trace("Stepping: {0}:{1}", stepEvent.Method.Name, stepEvent.Location);
 
             isStepping = false;
@@ -148,7 +148,7 @@ namespace MonoRemoteDebugger.Debugger
         {
             MonoPendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == bpEvent.Request);
             StackFrame[] frames = bpEvent.Thread.GetFrames();
-            _engine.Events.BreakpointHit(bp, _mainThread);
+            _engine.Callback.BreakpointHit(bp, _mainThread);
         }
 
         private int TryBindBreakpoints()
@@ -171,7 +171,7 @@ namespace MonoRemoteDebugger.Debugger
                             request.Enable();
                             bp.IsBound = true;
                             bp.LastRequest = request;
-                            _engine.Events.BoundBreakpoint(bp);
+                            _engine.Callback.BoundBreakpoint(bp);
                             _vm.Resume();
                             bp.CurrentThread = _mainThread;
                             countBounded++;

@@ -7,11 +7,11 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
     public class MonoDebuggerEvents
     {
         private readonly IDebugEventCallback2 _callback;
-        private readonly MonoEngine _engine;
+        private readonly AD7Engine _engine;
 
-        public MonoDebuggerEvents(MonoEngine monoEngine, IDebugEventCallback2 pCallback)
+        public MonoDebuggerEvents(AD7Engine engine, IDebugEventCallback2 pCallback)
         {
-            _engine = monoEngine;
+            _engine = engine;
             _callback = pCallback;
         }
 

@@ -33,7 +33,7 @@ namespace MonoRemoteDebugger.VSExtension
                 using (RegistryKey clsidKey = clsid.CreateSubKey(MonoGuids.EngineGuid.ToString("B").ToUpper()))
                 {
                     clsidKey.SetValue("Assembly", Assembly.GetExecutingAssembly().GetName().Name);
-                    clsidKey.SetValue("Class", "MonoRemoteDebugger.Debugger.VisualStudio.MonoEngine");
+                    clsidKey.SetValue("Class", typeof(AD7Engine).FullName);
                     clsidKey.SetValue("InprocServer32", @"c:\windows\system32\mscoree.dll");
                     clsidKey.SetValue("CodeBase", dllPath);
                 }
@@ -43,7 +43,7 @@ namespace MonoRemoteDebugger.VSExtension
                         clsid.CreateSubKey(MonoGuids.ProgramProviderGuid.ToString("B").ToUpper()))
                 {
                     programProviderKey.SetValue("Assembly", Assembly.GetExecutingAssembly().GetName().Name);
-                    programProviderKey.SetValue("Class", "MonoRemoteDebugger.Debugger.VisualStudio.MonoProgramProvider");
+                    programProviderKey.SetValue("Class", typeof(MonoProgramProvider).FullName);
                     programProviderKey.SetValue("InprocServer32", @"c:\windows\system32\mscoree.dll");
                     programProviderKey.SetValue("CodeBase", dllPath);
                 }

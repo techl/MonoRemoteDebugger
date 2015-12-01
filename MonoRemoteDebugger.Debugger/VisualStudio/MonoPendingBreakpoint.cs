@@ -19,12 +19,12 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly MonoEngine _engine;
+        private readonly AD7Engine _engine;
         private readonly IDebugBreakpointRequest2 _pBPRequest;
         private MonoBoundBreakpoint _boundBreakpoint;
         private BP_REQUEST_INFO _bpRequestInfo;
 
-        public MonoPendingBreakpoint(MonoEngine engine, IDebugBreakpointRequest2 pBPRequest)
+        public MonoPendingBreakpoint(AD7Engine engine, IDebugBreakpointRequest2 pBPRequest)
         {
             var requestInfo = new BP_REQUEST_INFO[1];
             pBPRequest.GetRequestInfo(enum_BPREQI_FIELDS.BPREQI_BPLOCATION, requestInfo);

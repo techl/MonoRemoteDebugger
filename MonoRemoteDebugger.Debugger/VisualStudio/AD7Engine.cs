@@ -8,20 +8,20 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     [ComVisible(true)]
     [Guid(MonoGuids.EngineString)]
-    public class MonoEngine : IDebugEngine2, IDebugEngineLaunch2, IDebugProgram3
+    public class AD7Engine : IDebugEngine2, IDebugEngineLaunch2, IDebugProgram3
     {
         private readonly AsyncDispatcher _dispatcher = new AsyncDispatcher();
         private Guid _programId;
 
-        public MonoEngine()
+        public AD7Engine()
         {
             Instance = this;
         }
 
-        public static MonoEngine Instance { get; private set; }
+        public static AD7Engine Instance { get; private set; }
 
         public DebuggedMonoProcess DebuggedProcess { get; private set; }
-        public MonoDebuggerEvents Events { get; private set; }
+        public MonoDebuggerEvents Callback { get; private set; }
         public MonoProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
 
@@ -34,8 +34,8 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             _dispatcher.Queue(() => DebuggedProcess.Attach());
             _dispatcher.Queue(() => DebuggedProcess.WaitForAttach());
 
-            Events.EngineCreated();
-            Events.ProgramCreated();
+            Callback.EngineCreated();
+            Callback.ProgramCreated();
 
 
             return VSConstants.S_OK;
@@ -126,7 +126,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             DebugHelper.TraceEnteringMethod();
 
-            Events = new MonoDebuggerEvents(this, pCallback);
+            Callback = new MonoDebuggerEvents(this, pCallback);
             DebuggedProcess = new DebuggedMonoProcess(this, IPAddress.Parse(pszArgs));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
 
@@ -155,7 +155,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             DebugHelper.TraceEnteringMethod();
             _dispatcher.Queue(() => DebuggedProcess.Terminate());
             _dispatcher.Stop();
-            Events.ProgramDestroyed(this);
+            Callback.ProgramDestroyed(this);
             return VSConstants.S_OK;
         }
 
@@ -293,7 +293,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         private void _debuggedProcess_ApplicationClosed(object sender, EventArgs e)
         {
             _dispatcher.Stop();
-            Events.ProgramDestroyed(this);
+            Callback.ProgramDestroyed(this);
         }
     }
 }
