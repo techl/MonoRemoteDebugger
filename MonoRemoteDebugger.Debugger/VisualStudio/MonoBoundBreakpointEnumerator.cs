@@ -6,7 +6,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
     internal class MonoBoundBreakpointEnumerator : MonoEnumerator<IDebugBoundBreakpoint2, IEnumDebugBoundBreakpoints2>,
         IEnumDebugBoundBreakpoints2
     {
-        public MonoBoundBreakpointEnumerator(IEnumerable<AD7BoundBreakpoint> data)
+        public MonoBoundBreakpointEnumerator(IEnumerable<MonoBoundBreakpoint> data)
             : base(data)
         {
         }

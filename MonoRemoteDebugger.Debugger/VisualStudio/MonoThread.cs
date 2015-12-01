@@ -8,11 +8,11 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     internal class MonoThread : IDebugThread2
     {
-        private readonly AD7Engine _engine;
+        private readonly MonoEngine _engine;
         private readonly DebuggedMonoProcess debuggedMonoProcess;
         private string _threadName = "Mono Thread";
 
-        public MonoThread(DebuggedMonoProcess debuggedMonoProcess, AD7Engine engine, ThreadMirror threadMirror)
+        public MonoThread(DebuggedMonoProcess debuggedMonoProcess, MonoEngine engine, ThreadMirror threadMirror)
         {
             this.debuggedMonoProcess = debuggedMonoProcess;
             _engine = engine;

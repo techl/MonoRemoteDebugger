@@ -83,7 +83,7 @@ namespace MonoRemoteDebugger.Debugger
             };
         }
 
-        internal static StatementRange GetILOffset(AD7PendingBreakpoint bp, MethodMirror methodMirror, out int ilOffset)
+        internal static StatementRange GetILOffset(MonoPendingBreakpoint bp, MethodMirror methodMirror, out int ilOffset)
         {
             List<Mono.Debugger.Soft.Location> locations = methodMirror.Locations.ToList();
 

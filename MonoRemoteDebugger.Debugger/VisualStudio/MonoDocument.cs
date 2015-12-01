@@ -7,9 +7,9 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     internal class MonoDocument : IDebugDocument2
     {
-        private readonly AD7PendingBreakpoint _pendingBreakpoint;
+        private readonly MonoPendingBreakpoint _pendingBreakpoint;
 
-        public MonoDocument(AD7PendingBreakpoint pendingBreakpoint)
+        public MonoDocument(MonoPendingBreakpoint pendingBreakpoint)
         {
             _pendingBreakpoint = pendingBreakpoint;
         }

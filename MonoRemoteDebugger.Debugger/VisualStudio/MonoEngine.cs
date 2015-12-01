@@ -8,20 +8,20 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     [ComVisible(true)]
     [Guid(MonoGuids.EngineString)]
-    public class AD7Engine : IDebugEngine2, IDebugEngineLaunch2, IDebugProgram3
+    public class MonoEngine : IDebugEngine2, IDebugEngineLaunch2, IDebugProgram3
     {
         private readonly AsyncDispatcher _dispatcher = new AsyncDispatcher();
         private Guid _programId;
 
-        public AD7Engine()
+        public MonoEngine()
         {
             Instance = this;
         }
 
-        public static AD7Engine Instance { get; private set; }
+        public static MonoEngine Instance { get; private set; }
 
         public DebuggedMonoProcess DebuggedProcess { get; private set; }
-        public MonoDebuggerEvents Callback { get; private set; }
+        public MonoDebuggerEvents Events { get; private set; }
         public MonoProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
 
@@ -34,8 +34,8 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             _dispatcher.Queue(() => DebuggedProcess.Attach());
             _dispatcher.Queue(() => DebuggedProcess.WaitForAttach());
 
-            Callback.EngineCreated();
-            Callback.ProgramCreated();
+            Events.EngineCreated();
+            Events.ProgramCreated();
 
 
             return VSConstants.S_OK;
@@ -45,7 +45,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             DebugHelper.TraceEnteringMethod();
 
-            AD7PendingBreakpoint breakpoint = DebuggedProcess.AddPendingBreakpoint(pBPRequest);
+            MonoPendingBreakpoint breakpoint = DebuggedProcess.AddPendingBreakpoint(pBPRequest);
             ppPendingBP = breakpoint;
 
             return VSConstants.S_OK;
@@ -126,7 +126,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             DebugHelper.TraceEnteringMethod();
 
-            Callback = new MonoDebuggerEvents(this, pCallback);
+            Events = new MonoDebuggerEvents(this, pCallback);
             DebuggedProcess = new DebuggedMonoProcess(this, IPAddress.Parse(pszArgs));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
 
@@ -155,7 +155,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             DebugHelper.TraceEnteringMethod();
             _dispatcher.Queue(() => DebuggedProcess.Terminate());
             _dispatcher.Stop();
-            Callback.ProgramDestroyed(this);
+            Events.ProgramDestroyed(this);
             return VSConstants.S_OK;
         }
 
@@ -293,7 +293,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         private void _debuggedProcess_ApplicationClosed(object sender, EventArgs e)
         {
             _dispatcher.Stop();
-            Callback.ProgramDestroyed(this);
+            Events.ProgramDestroyed(this);
         }
     }
 }
