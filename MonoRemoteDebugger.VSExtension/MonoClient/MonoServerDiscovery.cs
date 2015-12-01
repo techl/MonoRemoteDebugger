@@ -1,8 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MonoRemoteDebugger.VSExtension.MonoClient
 {
@@ -18,11 +20,11 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
                 {
                     UdpReceiveResult udpResult = task.Result;
                     string msg = Encoding.Default.GetString(udpResult.Buffer);
-                    return new MonoServerInformation {Message = msg, IpAddress = udpResult.RemoteEndPoint.Address};
+                    return new MonoServerInformation { Message = msg, IpAddress = udpResult.RemoteEndPoint.Address };
                 }
-
-                return null;
             }
+
+            return null;
         }
     }
 }

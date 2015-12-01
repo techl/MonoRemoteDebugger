@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading;
 using MonoRemoteDebugger.VSExtension.MonoClient;
 using MonoRemoteDebugger.VSExtension.Settings;
+using System.Threading.Tasks;
+using System.Net.Sockets;
+using System.Windows;
 
 namespace MonoRemoteDebugger.VSExtension.Views
 {
@@ -27,28 +30,46 @@ namespace MonoRemoteDebugger.VSExtension.Views
         {
             var discovery = new MonoServerDiscovery();
 
-            while (!token.IsCancellationRequested)
+            try
             {
-                token.ThrowIfCancellationRequested();
-                MonoServerInformation server = await discovery.SearchServer(token);
-                if (server != null)
+                while (!token.IsCancellationRequested)
                 {
-                    MonoServerInformation exists = Servers.FirstOrDefault(x => Equals(x.IpAddress, server.IpAddress));
-                    if (exists == null)
+                    token.ThrowIfCancellationRequested();
+                    MonoServerInformation server = await discovery.SearchServer(token);
+                    if (server != null)
                     {
-                        Servers.Add(server);
-                        server.LastMessage = DateTime.Now;
+                        MonoServerInformation exists = Servers.FirstOrDefault(x => Equals(x.IpAddress, server.IpAddress));
+                        if (exists == null)
+                        {
+                            Servers.Add(server);
+                            server.LastMessage = DateTime.Now;
+                        }
+                        else
+                        {
+                            exists.LastMessage = DateTime.Now;
+                        }
                     }
                     else
                     {
-                        exists.LastMessage = DateTime.Now;
+                        await Task.Delay(1000);
                     }
-                }
 
-                foreach (
-                    MonoServerInformation deadServer in
-                        Servers.Where(x => ((DateTime.Now - x.LastMessage).TotalSeconds > 5)).ToList())
-                    Servers.Remove(deadServer);
+                    foreach (
+                        MonoServerInformation deadServer in
+                            Servers.Where(x => ((DateTime.Now - x.LastMessage).TotalSeconds > 5)).ToList())
+                        Servers.Remove(deadServer);
+                }
+            }
+            catch (SocketException ex)
+            {
+                if (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                    MessageBox.Show("Port 15000 is in use.");
+                else
+                    MessageBox.Show(ex.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
 
