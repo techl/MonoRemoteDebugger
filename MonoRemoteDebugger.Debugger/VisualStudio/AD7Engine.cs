@@ -45,7 +45,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             DebugHelper.TraceEnteringMethod();
 
-            MonoPendingBreakpoint breakpoint = DebuggedProcess.AddPendingBreakpoint(pBPRequest);
+            AD7PendingBreakpoint breakpoint = DebuggedProcess.AddPendingBreakpoint(pBPRequest);
             ppPendingBP = breakpoint;
 
             return VSConstants.S_OK;

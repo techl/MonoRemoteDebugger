@@ -15,16 +15,16 @@ using NLog;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class MonoPendingBreakpoint : IDebugPendingBreakpoint2
+    internal class AD7PendingBreakpoint : IDebugPendingBreakpoint2
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly AD7Engine _engine;
         private readonly IDebugBreakpointRequest2 _pBPRequest;
-        private MonoBoundBreakpoint _boundBreakpoint;
+        private AD7BoundBreakpoint _boundBreakpoint;
         private BP_REQUEST_INFO _bpRequestInfo;
 
-        public MonoPendingBreakpoint(AD7Engine engine, IDebugBreakpointRequest2 pBPRequest)
+        public AD7PendingBreakpoint(AD7Engine engine, IDebugBreakpointRequest2 pBPRequest)
         {
             var requestInfo = new BP_REQUEST_INFO[1];
             pBPRequest.GetRequestInfo(enum_BPREQI_FIELDS.BPREQI_BPLOCATION, requestInfo);
@@ -66,7 +66,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             try
             {
-                _boundBreakpoint = new MonoBoundBreakpoint(_engine, this);
+                _boundBreakpoint = new AD7BoundBreakpoint(_engine, this);
                 return VSConstants.S_OK;
             }
             catch

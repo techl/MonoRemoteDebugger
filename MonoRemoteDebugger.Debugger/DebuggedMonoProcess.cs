@@ -17,7 +17,7 @@ namespace MonoRemoteDebugger.Debugger
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly AD7Engine _engine;
         private readonly IPAddress _ipAddress;
-        private readonly List<MonoPendingBreakpoint> _pendingBreakpoints = new List<MonoPendingBreakpoint>();
+        private readonly List<AD7PendingBreakpoint> _pendingBreakpoints = new List<AD7PendingBreakpoint>();
         private readonly Dictionary<string, TypeSummary> _types = new Dictionary<string, TypeSummary>();
         private volatile bool _isRunning = true;
         private MonoThread _mainThread;
@@ -146,7 +146,7 @@ namespace MonoRemoteDebugger.Debugger
 
         private void HandleBreakPoint(BreakpointEvent bpEvent)
         {
-            MonoPendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == bpEvent.Request);
+            AD7PendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == bpEvent.Request);
             StackFrame[] frames = bpEvent.Thread.GetFrames();
             _engine.Callback.BreakpointHit(bp, _mainThread);
         }
@@ -157,7 +157,7 @@ namespace MonoRemoteDebugger.Debugger
 
             try
             {
-                foreach (MonoPendingBreakpoint bp in _pendingBreakpoints.Where(x => !x.IsBound))
+                foreach (AD7PendingBreakpoint bp in _pendingBreakpoints.Where(x => !x.IsBound))
                 {
                     MonoBreakpointLocation location;
                     if (bp.TryBind(_types, out location))
@@ -256,9 +256,9 @@ namespace MonoRemoteDebugger.Debugger
             }
         }
 
-        internal MonoPendingBreakpoint AddPendingBreakpoint(IDebugBreakpointRequest2 pBPRequest)
+        internal AD7PendingBreakpoint AddPendingBreakpoint(IDebugBreakpointRequest2 pBPRequest)
         {
-            var bp = new MonoPendingBreakpoint(_engine, pBPRequest);
+            var bp = new AD7PendingBreakpoint(_engine, pBPRequest);
             _pendingBreakpoints.Add(bp);
             TryBindBreakpoints();
             return bp;

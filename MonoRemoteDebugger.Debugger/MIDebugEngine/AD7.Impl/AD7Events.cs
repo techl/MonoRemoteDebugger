@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.VisualStudio.Debugger.Interop;
-//using MICore;
+using MICore;
 using System.Diagnostics;
 using MonoRemoteDebugger.Debugger.VisualStudio;
 
@@ -35,6 +35,7 @@ namespace Microsoft.MIDebugEngine
     internal class AD7StoppingEvent : IDebugEvent2
     {
         public const uint Attributes = (uint)enum_EVENTATTRIBUTES.EVENT_ASYNC_STOP;
+        //public const uint Attributes = (uint) enum_EVENTATTRIBUTES.EVENT_SYNC_STOP;
 
         int IDebugEvent2.GetAttributes(out uint eventAttributes)
         {
@@ -73,7 +74,8 @@ namespace Microsoft.MIDebugEngine
         public const string IID = "FE5B734C-759D-4E59-AB04-F103343BDD06";
         private IDebugEngine2 _engine;
 
-        private AD7EngineCreateEvent(AD7Engine engine)
+        //private AD7EngineCreateEvent(AD7Engine engine)
+        public AD7EngineCreateEvent(AD7Engine engine)
         {
             _engine = engine;
         }
@@ -168,7 +170,7 @@ namespace Microsoft.MIDebugEngine
 
         private readonly OutputMessage _outputMessage;
         private readonly bool _isAsync;
-        
+
         public AD7MessageEvent(OutputMessage outputMessage, bool isAsync)
         {
             _outputMessage = outputMessage;
@@ -372,76 +374,76 @@ namespace Microsoft.MIDebugEngine
     //    private IDebugProperty2 _prop;
     //}
 
-    //// This interface tells the session debug manager (SDM) that an exception has occurred in the debuggee.
-    //internal sealed class AD7ExceptionEvent : AD7StoppingEvent, IDebugExceptionEvent2
-    //{
-    //    public const string IID = "51A94113-8788-4A54-AE15-08B74FF922D0";
+    // This interface tells the session debug manager (SDM) that an exception has occurred in the debuggee.
+    internal sealed class AD7ExceptionEvent : AD7StoppingEvent, IDebugExceptionEvent2
+    {
+        public const string IID = "51A94113-8788-4A54-AE15-08B74FF922D0";
 
-    //    public AD7ExceptionEvent(string name, string description, uint code, Guid? exceptionCategory, ExceptionBreakpointState state)
-    //    {
-    //        _name = name;
-    //        _code = code;
-    //        _description = description ?? name;
-    //        _category = exceptionCategory ?? new Guid(EngineConstants.EngineId);
+        public AD7ExceptionEvent(string name, string description, uint code, Guid? exceptionCategory, ExceptionBreakpointState state)
+        {
+            _name = name;
+            _code = code;
+            _description = description ?? name;
+            _category = exceptionCategory ?? new Guid(EngineConstants.EngineId);
 
-    //        switch (state)
-    //        {
-    //            case ExceptionBreakpointState.None:
-    //                _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE;
-    //                break;
+            switch (state)
+            {
+                case ExceptionBreakpointState.None:
+                    _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE;
+                    break;
 
-    //            case ExceptionBreakpointState.BreakThrown:
-    //                _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_FIRST_CHANCE | enum_EXCEPTION_STATE.EXCEPTION_STOP_USER_FIRST_CHANCE;
-    //                break;
+                case ExceptionBreakpointState.BreakThrown:
+                    _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_FIRST_CHANCE | enum_EXCEPTION_STATE.EXCEPTION_STOP_USER_FIRST_CHANCE;
+                    break;
 
-    //            case ExceptionBreakpointState.BreakUserHandled:
-    //                _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_USER_UNCAUGHT;
-    //                break;
+                case ExceptionBreakpointState.BreakUserHandled:
+                    _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_USER_UNCAUGHT;
+                    break;
 
-    //            default:
-    //                Debug.Fail("Unexpected state value");
-    //                _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE;
-    //                break;
-    //        }
-    //    }
+                default:
+                    Debug.Fail("Unexpected state value");
+                    _state = enum_EXCEPTION_STATE.EXCEPTION_STOP_SECOND_CHANCE;
+                    break;
+            }
+        }
 
-    //    #region IDebugExceptionEvent2 Members
+        #region IDebugExceptionEvent2 Members
 
-    //    public int CanPassToDebuggee()
-    //    {
-    //        // Cannot pass it on
-    //        return Constants.S_FALSE;
-    //    }
+        public int CanPassToDebuggee()
+        {
+            // Cannot pass it on
+            return Constants.S_FALSE;
+        }
 
-    //    public int GetException(EXCEPTION_INFO[] pExceptionInfo)
-    //    {
-    //        EXCEPTION_INFO ex = new EXCEPTION_INFO();
-    //        ex.bstrExceptionName = _name;
-    //        ex.dwCode = _code;
-    //        ex.dwState = _state;
-    //        ex.guidType = _category;
-    //        pExceptionInfo[0] = ex;
-    //        return Constants.S_OK;
-    //    }
+        public int GetException(EXCEPTION_INFO[] pExceptionInfo)
+        {
+            EXCEPTION_INFO ex = new EXCEPTION_INFO();
+            ex.bstrExceptionName = _name;
+            ex.dwCode = _code;
+            ex.dwState = _state;
+            ex.guidType = _category;
+            pExceptionInfo[0] = ex;
+            return Constants.S_OK;
+        }
 
-    //    public int GetExceptionDescription(out string pbstrDescription)
-    //    {
-    //        pbstrDescription = _description;
-    //        return Constants.S_OK;
-    //    }
+        public int GetExceptionDescription(out string pbstrDescription)
+        {
+            pbstrDescription = _description;
+            return Constants.S_OK;
+        }
 
-    //    public int PassToDebuggee(int fPass)
-    //    {
-    //        return Constants.S_OK;
-    //    }
+        public int PassToDebuggee(int fPass)
+        {
+            return Constants.S_OK;
+        }
 
-    //    private string _name;
-    //    private uint _code;
-    //    private string _description;
-    //    private Guid _category;
-    //    private enum_EXCEPTION_STATE _state;
-    //    #endregion
-    //}
+        private string _name;
+        private uint _code;
+        private string _description;
+        private Guid _category;
+        private enum_EXCEPTION_STATE _state;
+        #endregion
+    }
 
     // This interface tells the session debug manager (SDM) that a step has completed
     internal sealed class AD7StepCompleteEvent : AD7StoppingEvent, IDebugStepCompleteEvent2
@@ -507,47 +509,54 @@ namespace Microsoft.MIDebugEngine
     //    #endregion
     //}
 
-    //// This interface is sent when a pending breakpoint has been bound in the debuggee.
-    //internal sealed class AD7BreakpointBoundEvent : AD7AsynchronousEvent, IDebugBreakpointBoundEvent2
-    //{
-    //    public const string IID = "1dddb704-cf99-4b8a-b746-dabb01dd13a0";
+    // This interface is sent when a pending breakpoint has been bound in the debuggee.
+    //BreakPointEvent
+    internal sealed class AD7BreakpointBoundEvent : AD7AsynchronousEvent, IDebugBreakpointBoundEvent2
+    {
+        public const string IID = "1dddb704-cf99-4b8a-b746-dabb01dd13a0";
 
-    //    private AD7PendingBreakpoint _pendingBreakpoint;
-    //    private AD7BoundBreakpoint _boundBreakpoint;
+        private AD7PendingBreakpoint _pendingBreakpoint;
+        private AD7BoundBreakpoint _boundBreakpoint;
 
-    //    public AD7BreakpointBoundEvent(AD7PendingBreakpoint pendingBreakpoint, AD7BoundBreakpoint boundBreakpoint)
-    //    {
-    //        _pendingBreakpoint = pendingBreakpoint;
-    //        _boundBreakpoint = boundBreakpoint;
-    //    }
+        //public AD7BreakpointBoundEvent(AD7PendingBreakpoint pendingBreakpoint, AD7BoundBreakpoint boundBreakpoint)
+        public AD7BreakpointBoundEvent(AD7PendingBreakpoint pendingBreakpoint, AD7BoundBreakpoint boundBreakpoint = null)
+        {
+            _pendingBreakpoint = pendingBreakpoint;
+            _boundBreakpoint = boundBreakpoint;
+        }
 
-    //    #region IDebugBreakpointBoundEvent2 Members
+        #region IDebugBreakpointBoundEvent2 Members
 
-    //    int IDebugBreakpointBoundEvent2.EnumBoundBreakpoints(out IEnumDebugBoundBreakpoints2 ppEnum)
-    //    {
-    //        IDebugBoundBreakpoint2[] boundBreakpoints = new IDebugBoundBreakpoint2[1];
-    //        boundBreakpoints[0] = _boundBreakpoint;
-    //        ppEnum = new AD7BoundBreakpointsEnum(boundBreakpoints);
-    //        return Constants.S_OK;
-    //    }
+        int IDebugBreakpointBoundEvent2.EnumBoundBreakpoints(out IEnumDebugBoundBreakpoints2 ppEnum)
+        {
+            //IDebugBoundBreakpoint2[] boundBreakpoints = new IDebugBoundBreakpoint2[1];
+            //boundBreakpoints[0] = _boundBreakpoint;
+            //ppEnum = new AD7BoundBreakpointsEnum(boundBreakpoints);
+            //return Constants.S_OK;
 
-    //    int IDebugBreakpointBoundEvent2.GetPendingBreakpoint(out IDebugPendingBreakpoint2 ppPendingBP)
-    //    {
-    //        ppPendingBP = _pendingBreakpoint;
-    //        return Constants.S_OK;
-    //    }
+            return _pendingBreakpoint.EnumBoundBreakpoints(out ppEnum);
+        }
 
-    //    #endregion
-    //}
+        int IDebugBreakpointBoundEvent2.GetPendingBreakpoint(out IDebugPendingBreakpoint2 ppPendingBP)
+        {
+            ppPendingBP = _pendingBreakpoint;
+            return Constants.S_OK;
+        }
+
+        #endregion
+    }
 
     // This Event is sent when a breakpoint is hit in the debuggee
+    //BreakPointHitEvent
     internal sealed class AD7BreakpointEvent : AD7StoppingEvent, IDebugBreakpointEvent2
     {
         public const string IID = "501C1E21-C557-48B8-BA30-A1EAB0BC4A74";
 
-        private IEnumDebugBoundBreakpoints2 _boundBreakpoints;
+        //AD7PendingBreakpoint
+        //private IEnumDebugBoundBreakpoints2 _boundBreakpoints;
+        private readonly AD7PendingBreakpoint _boundBreakpoints;
 
-        public AD7BreakpointEvent(IEnumDebugBoundBreakpoints2 boundBreakpoints)
+        public AD7BreakpointEvent(AD7PendingBreakpoint boundBreakpoints)
         {
             _boundBreakpoints = boundBreakpoints;
         }
@@ -556,8 +565,10 @@ namespace Microsoft.MIDebugEngine
 
         int IDebugBreakpointEvent2.EnumBreakpoints(out IEnumDebugBoundBreakpoints2 ppEnum)
         {
-            ppEnum = _boundBreakpoints;
-            return Constants.S_OK;
+            //ppEnum = _boundBreakpoints;
+            //return Constants.S_OK;
+
+            return _boundBreakpoints.EnumBoundBreakpoints(out ppEnum);
         }
 
         #endregion
