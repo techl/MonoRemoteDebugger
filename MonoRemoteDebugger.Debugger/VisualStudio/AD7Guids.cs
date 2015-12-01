@@ -2,7 +2,7 @@
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    public static class MonoGuids
+    public static class AD7Guids
     {
         public const string EngineString = "8BF3AB9F-3864-449A-93AB-E7B0935FC8F5";
         public const string ProgramProviderString = "CA171DED-5920-4ACD-93C2-BD9E4FA10CA0";

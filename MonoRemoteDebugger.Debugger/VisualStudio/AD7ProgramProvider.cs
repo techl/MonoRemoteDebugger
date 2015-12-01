@@ -6,8 +6,8 @@ using Microsoft.VisualStudio.Debugger.Interop;
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     [ComVisible(true)]
-    [Guid(MonoGuids.ProgramProviderString)]
-    public class MonoProgramProvider : IDebugProgramProvider2
+    [Guid(AD7Guids.ProgramProviderString)]
+    public class AD7ProgramProvider : IDebugProgramProvider2
     {
         public int GetProviderProcessData(enum_PROVIDER_FLAGS Flags, IDebugDefaultPort2 pPort, AD_PROCESS_ID ProcessId,
             CONST_GUID_ARRAY EngineFilter, PROVIDER_PROCESS_DATA[] pProcess)

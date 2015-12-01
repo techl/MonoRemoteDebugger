@@ -3,11 +3,12 @@ using System.Net;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
     [ComVisible(true)]
-    [Guid(MonoGuids.EngineString)]
+    [Guid(AD7Guids.EngineString)]
     public class AD7Engine : IDebugEngine2, IDebugEngineLaunch2, IDebugProgram3
     {
         private readonly AsyncDispatcher _dispatcher = new AsyncDispatcher();
@@ -20,9 +21,9 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public static AD7Engine Instance { get; private set; }
 
-        public DebuggedMonoProcess DebuggedProcess { get; private set; }
+        public DebuggedProcess DebuggedProcess { get; private set; }
         public MonoDebuggerEvents Callback { get; private set; }
-        public MonoProgramNode Node { get; private set; }
+        public AD7ProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
 
         public int Attach(IDebugProgram2[] rgpPrograms, IDebugProgramNode2[] rgpProgramNodes, uint celtPrograms,
@@ -80,7 +81,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int GetEngineId(out Guid pguidEngine)
         {
             DebugHelper.TraceEnteringMethod();
-            pguidEngine = MonoGuids.EngineGuid;
+            pguidEngine = AD7Guids.EngineGuid;
             return VSConstants.S_OK;
         }
 
@@ -127,7 +128,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             DebugHelper.TraceEnteringMethod();
 
             Callback = new MonoDebuggerEvents(this, pCallback);
-            DebuggedProcess = new DebuggedMonoProcess(this, IPAddress.Parse(pszArgs));
+            DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(pszArgs));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
 
             ppProcess = RemoteProcess = new MonoProcess(pPort);
@@ -145,7 +146,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             IDebugPortNotify2 notify;
             defaultPort.GetPortNotify(out notify);
 
-            int result = notify.AddProgramNode(Node = new MonoProgramNode(DebuggedProcess, id));
+            int result = notify.AddProgramNode(Node = new AD7ProgramNode(DebuggedProcess, id));
 
             return VSConstants.S_OK;
         }
@@ -226,14 +227,14 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int Step(IDebugThread2 pThread, enum_STEPKIND sk, enum_STEPUNIT Step)
         {
-            var thread = (MonoThread) pThread;
+            var thread = (AD7Thread) pThread;
             _dispatcher.Queue(() => DebuggedProcess.Step(thread, sk));
             return VSConstants.S_OK;
         }
 
         public int ExecuteOnThread(IDebugThread2 pThread)
         {
-            var thread = (MonoThread) pThread;
+            var thread = (AD7Thread) pThread;
             _dispatcher.Queue(() => DebuggedProcess.Execute(thread));
             return VSConstants.S_OK;
         }

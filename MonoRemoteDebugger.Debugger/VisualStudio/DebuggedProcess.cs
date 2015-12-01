@@ -9,10 +9,11 @@ using Mono.Debugger.Soft;
 using MonoRemoteDebugger.Contracts;
 using MonoRemoteDebugger.Debugger.VisualStudio;
 using NLog;
+using MonoRemoteDebugger.Debugger;
 
-namespace MonoRemoteDebugger.Debugger
+namespace Microsoft.MIDebugEngine
 {
-    public class DebuggedMonoProcess
+    public class DebuggedProcess
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly AD7Engine _engine;
@@ -20,7 +21,7 @@ namespace MonoRemoteDebugger.Debugger
         private readonly List<AD7PendingBreakpoint> _pendingBreakpoints = new List<AD7PendingBreakpoint>();
         private readonly Dictionary<string, TypeSummary> _types = new Dictionary<string, TypeSummary>();
         private volatile bool _isRunning = true;
-        private MonoThread _mainThread;
+        private AD7Thread _mainThread;
         private VirtualMachine _vm;
 
 
@@ -28,14 +29,14 @@ namespace MonoRemoteDebugger.Debugger
         private bool isStepping;
         private IDebugSession session;
 
-        public DebuggedMonoProcess(AD7Engine engine, IPAddress ipAddress)
+        public DebuggedProcess(AD7Engine engine, IPAddress ipAddress)
         {
             _engine = engine;
             _ipAddress = ipAddress;
             Instance = this;
         }
 
-        public static DebuggedMonoProcess Instance { get; private set; }
+        public static DebuggedProcess Instance { get; private set; }
 
         public IReadOnlyDictionary<string, TypeSummary> KnownTypes
         {
@@ -63,7 +64,7 @@ namespace MonoRemoteDebugger.Debugger
             EventSet set = _vm.GetNextEventSet();
             if (set.Events.OfType<VMStartEvent>().Any())
             {
-                _mainThread = new MonoThread(this, _engine, set.Events[0].Thread);
+                _mainThread = new AD7Thread(this, _engine, set.Events[0].Thread);
                 _engine.Callback.ThreadStarted(_mainThread);
 
                 Task.Factory.StartNew(ReceiveThread, TaskCreationOptions.LongRunning);
@@ -233,7 +234,7 @@ namespace MonoRemoteDebugger.Debugger
             _vm.Resume();
         }
 
-        internal void Execute(MonoThread debuggedMonoThread)
+        internal void Execute(AD7Thread debuggedMonoThread)
         {
             _vm.Resume();
         }
@@ -264,7 +265,7 @@ namespace MonoRemoteDebugger.Debugger
             return bp;
         }
 
-        internal void Step(MonoThread thread, enum_STEPKIND sk)
+        internal void Step(AD7Thread thread, enum_STEPKIND sk)
         {
             if (isStepping)
                 return;
@@ -301,5 +302,12 @@ namespace MonoRemoteDebugger.Debugger
         {
             this.session = session;
         }
+
+        //{bhlee
+        internal static string UnixPathToWindowsPath(string unixPath)
+        {
+            return unixPath.Replace('/', '\\');
+        }
+        //}
     }
 }

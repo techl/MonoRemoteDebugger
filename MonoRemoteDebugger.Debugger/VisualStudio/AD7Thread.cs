@@ -3,16 +3,17 @@ using System.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
+using MonoRemoteDebugger.Debugger.VisualStudio;
 
-namespace MonoRemoteDebugger.Debugger.VisualStudio
+namespace Microsoft.MIDebugEngine
 {
-    internal class MonoThread : IDebugThread2
+    internal class AD7Thread : IDebugThread2
     {
         private readonly AD7Engine _engine;
-        private readonly DebuggedMonoProcess debuggedMonoProcess;
+        private readonly DebuggedProcess debuggedMonoProcess;
         private string _threadName = "Mono Thread";
 
-        public MonoThread(DebuggedMonoProcess debuggedMonoProcess, AD7Engine engine, ThreadMirror threadMirror)
+        public AD7Thread(DebuggedProcess debuggedMonoProcess, AD7Engine engine, ThreadMirror threadMirror)
         {
             this.debuggedMonoProcess = debuggedMonoProcess;
             _engine = engine;
@@ -30,8 +31,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             StackFrame[] stackFrames = ThreadMirror.GetFrames();
             ppEnum =
-                new MonoFrameInfoEnum(
-                    stackFrames.Select(x => new MonoStackFrame(this, debuggedMonoProcess, x).GetFrameInfo(dwFieldSpec)));
+                new AD7FrameInfoEnum(stackFrames.Select(x => new AD7StackFrame(this, debuggedMonoProcess, x).GetFrameInfo(dwFieldSpec)).ToArray());
             return VSConstants.S_OK;
         }
 

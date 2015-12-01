@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
@@ -55,7 +56,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             var fields = typeMirror.GetFields();
             var children = properties.Concat(methods).Concat(fields).ToList();
 
-            ppEnum = new MonoPropertyInfosEnum(children.Select(x => new MonoProperty(frame, variable, typeMirror, x).GetDebugPropertyInfo(dwFields)));
+            ppEnum = new AD7PropertyInfoEnum(children.Select(x => new MonoProperty(frame, variable, typeMirror, x).GetDebugPropertyInfo(dwFields)).ToArray());
             return VSConstants.S_OK;
         }
 

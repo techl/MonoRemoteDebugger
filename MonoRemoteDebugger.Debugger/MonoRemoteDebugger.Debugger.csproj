@@ -125,38 +125,35 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Contracts\IDebugSession.cs" />
-    <Compile Include="DebuggedMonoProcess.cs" />
-    <Compile Include="DebuggedMonoThread.cs" />
+    <Compile Include="VisualStudio\DebuggedProcess.cs" />
+    <Compile Include="VisualStudio\DebuggedMonoThread.cs" />
     <Compile Include="MIDebugEngine\AD7.Impl\AD7Enums.cs" />
     <Compile Include="MIDebugEngine\AD7.Impl\AD7Events.cs" />
     <Compile Include="MIDebugEngine\AD7.Impl\EngineConstants.cs" />
+    <Compile Include="MIDebugEngine\Engine.Impl\MITextPosition.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\Structures.cs" />
     <Compile Include="RoslynHelper.cs" />
     <Compile Include="StatementRange.cs" />
     <Compile Include="VisualStudio\AD7BoundBreakpoint.cs" />
-    <Compile Include="VisualStudio\MonoBoundBreakpointEnumerator.cs" />
     <Compile Include="VisualStudio\MonoBreakpointLocation.cs" />
     <Compile Include="VisualStudio\MonoDocument.cs" />
-    <Compile Include="VisualStudio\MonoEnumerator.cs" />
-    <Compile Include="VisualStudio\MonoFrameInfoEnum.cs" />
     <Compile Include="VisualStudio\AD7PendingBreakpoint.cs" />
     <Compile Include="VisualStudio\MonoProcess.cs" />
     <Compile Include="VisualStudio\AsyncDispatcher.cs" />
-    <Compile Include="VisualStudio\MonoGuids.cs" />
+    <Compile Include="VisualStudio\AD7Guids.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="Enums\SteppingTypeEnum.cs" />
     <Compile Include="VisualStudio\MonoDebuggerEvents.cs" />
-    <Compile Include="VisualStudio\MonoDocumentContext.cs" />
+    <Compile Include="VisualStudio\AD7DocumentContext.cs" />
     <Compile Include="VisualStudio\AD7Engine.cs" />
-    <Compile Include="VisualStudio\MonoProgramNode.cs" />
-    <Compile Include="VisualStudio\MonoProgramProvider.cs" />
+    <Compile Include="VisualStudio\AD7ProgramNode.cs" />
+    <Compile Include="VisualStudio\AD7ProgramProvider.cs" />
     <Compile Include="VisualStudio\MonoProperty.cs" />
-    <Compile Include="VisualStudio\MonoPropertyInfosEnum.cs" />
-    <Compile Include="VisualStudio\MonoStackFrame.cs" />
-    <Compile Include="VisualStudio\MonoThread.cs" />
+    <Compile Include="VisualStudio\AD7StackFrame.cs" />
+    <Compile Include="VisualStudio\AD7Thread.cs" />
     <Compile Include="TextPosition.cs" />
     <Compile Include="TypeSummary.cs" />
-    <Compile Include="VisualStudio\TrivialMonoExpression.cs" />
+    <Compile Include="VisualStudio\AD7Expression.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

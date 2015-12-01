@@ -1,15 +1,16 @@
 ﻿using System;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    public class MonoProgramNode : IDebugProgramNode2
+    public class AD7ProgramNode : IDebugProgramNode2
     {
-        private readonly DebuggedMonoProcess _process;
+        private readonly DebuggedProcess _process;
         private readonly Guid _processId;
 
-        public MonoProgramNode(DebuggedMonoProcess process, Guid processId)
+        public AD7ProgramNode(DebuggedProcess process, Guid processId)
         {
             _process = process;
             _processId = processId;
@@ -37,8 +38,8 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int GetEngineInfo(out string pbstrEngine, out Guid pguidEngine)
         {
             DebugHelper.TraceEnteringMethod();
-            pbstrEngine = MonoGuids.EngineName;
-            pguidEngine = MonoGuids.EngineGuid;
+            pbstrEngine = AD7Guids.EngineName;
+            pguidEngine = AD7Guids.EngineGuid;
             return VSConstants.S_OK;
         }
 

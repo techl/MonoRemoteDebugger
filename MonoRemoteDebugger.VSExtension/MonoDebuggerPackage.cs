@@ -19,6 +19,7 @@ using MonoRemoteDebugger.VSExtension.Settings;
 using MonoRemoteDebugger.VSExtension.Views;
 using NLog;
 using Process = System.Diagnostics.Process;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.VSExtension
 {
@@ -96,7 +97,7 @@ namespace MonoRemoteDebugger.VSExtension
                 if (regKey != null)
                     return;
 
-                string location = typeof (DebuggedMonoProcess).Assembly.Location;
+                string location = typeof (DebuggedProcess).Assembly.Location;
 
                 string regasm = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe";
                 if (!Environment.Is64BitOperatingSystem)

@@ -3,11 +3,11 @@ using Microsoft.VisualStudio.Debugger.Interop;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class TrivialMonoExpression : IDebugExpression2
+    internal class AD7Expression : IDebugExpression2
     {
         private readonly MonoProperty _monoProperty;
 
-        public TrivialMonoExpression(MonoProperty monoProperty)
+        public AD7Expression(MonoProperty monoProperty)
         {
             _monoProperty = monoProperty;
         }

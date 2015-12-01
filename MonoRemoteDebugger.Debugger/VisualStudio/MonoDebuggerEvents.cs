@@ -55,21 +55,21 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
                 AD7AsynchronousEvent.Attributes);
         }
 
-        internal void BreakpointHit(AD7PendingBreakpoint breakpoint, MonoThread thread)
+        internal void BreakpointHit(AD7PendingBreakpoint breakpoint, AD7Thread thread)
         {
             var iid = new Guid(AD7BreakpointEvent.IID);
             _callback.Event(_engine, _engine.RemoteProcess, _engine, thread, new AD7BreakpointEvent(breakpoint), ref iid,
                 AD7StoppingEvent.Attributes);
         }
 
-        internal void ThreadStarted(MonoThread thread)
+        internal void ThreadStarted(AD7Thread thread)
         {
             var iid = new Guid(Microsoft.MIDebugEngine.AD7ThreadCreateEvent.IID);
             _callback.Event(_engine, _engine.RemoteProcess, _engine, thread, new Microsoft.MIDebugEngine.AD7ThreadCreateEvent(), ref iid,
                 AD7StoppingEvent.Attributes);
         }
 
-        internal void StepCompleted(MonoThread thread)
+        internal void StepCompleted(AD7Thread thread)
         {
             var iid = new Guid(Microsoft.MIDebugEngine.AD7StepCompleteEvent.IID);
             _callback.Event(_engine, _engine.RemoteProcess, _engine, thread, new Microsoft.MIDebugEngine.AD7StepCompleteEvent(), ref iid,

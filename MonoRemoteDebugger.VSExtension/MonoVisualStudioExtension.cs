@@ -13,6 +13,7 @@ using MonoRemoteDebugger.VSExtension.MonoClient;
 using NLog;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.VSExtension
 {
@@ -84,7 +85,7 @@ namespace MonoRemoteDebugger.VSExtension
                 int hr = dbg.LaunchDebugTargets(1, pInfo);
                 Marshal.ThrowExceptionForHR(hr);
 
-                DebuggedMonoProcess.Instance.AssociateDebugSession(session);
+                DebuggedProcess.Instance.AssociateDebugSession(session);
             }
             catch(Exception ex)
             {
@@ -118,7 +119,7 @@ namespace MonoRemoteDebugger.VSExtension
             info.bstrRemoteMachine = null; // debug locally
             info.grfLaunch = (uint) __VSDBGLAUNCHFLAGS.DBGLAUNCH_StopDebuggingOnEnd;
             info.fSendStdoutToOutputWindow = 0;
-            info.clsidCustom = MonoGuids.EngineGuid;
+            info.clsidCustom = AD7Guids.EngineGuid;
             info.grfLaunch = 0;
 
             IntPtr pInfo = Marshal.AllocCoTaskMem((int) info.cbSize);

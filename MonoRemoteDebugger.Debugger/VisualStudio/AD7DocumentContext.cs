@@ -4,12 +4,12 @@ using Microsoft.VisualStudio.Debugger.Interop;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class MonoDocumentContext : IDebugDocumentContext2, IDebugCodeContext2
+    internal class AD7DocumentContext : IDebugDocumentContext2, IDebugCodeContext2
     {
         private readonly StatementRange _currentStatementRange;
         private readonly string _fileName;
 
-        public MonoDocumentContext(string fileName, int startLine, int startColumn)
+        public AD7DocumentContext(string fileName, int startLine, int startColumn)
         {
             _fileName = fileName;
             _currentStatementRange = RoslynHelper.GetStatementRange(fileName, startLine, startColumn);
@@ -53,7 +53,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int GetName(out string pbstrName)
         {
-            pbstrName = MonoGuids.LanguageName;
+            pbstrName = AD7Guids.LanguageName;
             return VSConstants.S_OK;
         }
 
@@ -83,8 +83,8 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int GetLanguageInfo(ref string pbstrLanguage, ref Guid pguidLanguage)
         {
-            pbstrLanguage = MonoGuids.LanguageName;
-            pguidLanguage = MonoGuids.LanguageGuid;
+            pbstrLanguage = AD7Guids.LanguageName;
+            pguidLanguage = AD7Guids.LanguageGuid;
             return VSConstants.S_OK;
         }
 

@@ -12,6 +12,7 @@ using Mono.Debugger.Soft;
 using Location = Microsoft.CodeAnalysis.Location;
 using System.IO;
 using NLog;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
@@ -59,7 +60,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int EndLine { get; private set; }
         public int EndColumn { get; private set; }
         public string DocumentName { get; set; }
-        public MonoThread CurrentThread { get; set; }
+        public AD7Thread CurrentThread { get; set; }
         public EventRequest LastRequest { get; set; }
 
         public int Bind()
@@ -97,7 +98,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int EnumBoundBreakpoints(out IEnumDebugBoundBreakpoints2 ppEnum)
         {
-            ppEnum = new MonoBoundBreakpointEnumerator(new[] {_boundBreakpoint});
+            ppEnum = new AD7BoundBreakpointsEnum(new[] {_boundBreakpoint});
             return VSConstants.S_OK;
         }
 

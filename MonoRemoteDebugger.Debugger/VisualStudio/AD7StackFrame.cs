@@ -4,24 +4,25 @@ using System.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
+using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class MonoStackFrame : IDebugStackFrame2, IDebugExpressionContext2
+    internal class AD7StackFrame : IDebugStackFrame2, IDebugExpressionContext2
     {
-        private readonly MonoDocumentContext docContext;
+        private readonly AD7DocumentContext docContext;
         private readonly StackFrame frame;
         private readonly List<MonoProperty> locals;
-        private readonly MonoThread thread;
-        private readonly DebuggedMonoProcess debuggedMonoProcess;
+        private readonly AD7Thread thread;
+        private readonly DebuggedProcess debuggedMonoProcess;
 
-        public MonoStackFrame(MonoThread thread, DebuggedMonoProcess debuggedMonoProcess, StackFrame frame)
+        public AD7StackFrame(AD7Thread thread, DebuggedProcess debuggedMonoProcess, StackFrame frame)
         {
             this.thread = thread;
             this.debuggedMonoProcess = debuggedMonoProcess;
             this.frame = frame;
             
-            docContext = new MonoDocumentContext(this.frame.FileName,
+            docContext = new AD7DocumentContext(this.frame.FileName,
                 this.frame.LineNumber,
                 this.frame.ColumnNumber);
             var locals = frame.GetVisibleVariables().ToList();
@@ -41,7 +42,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             LocalVariable result = frame.GetVisibleVariableByName(lookup);
             if (result != null)
             {
-                ppExpr = new TrivialMonoExpression(new MonoProperty(frame, result));
+                ppExpr = new AD7Expression(new MonoProperty(frame, result));
                 return VSConstants.S_OK;
             }
 
@@ -53,7 +54,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int EnumProperties(enum_DEBUGPROP_INFO_FLAGS dwFields, uint nRadix, ref Guid guidFilter, uint dwTimeout,
             out uint pcelt, out IEnumDebugPropertyInfo2 ppEnum)
         {
-            ppEnum = new MonoPropertyInfosEnum(locals.Select(x => x.GetDebugPropertyInfo(dwFields)));
+            ppEnum = new AD7PropertyInfoEnum(locals.Select(x => x.GetDebugPropertyInfo(dwFields)).ToArray());
             ppEnum.GetCount(out pcelt);
             return VSConstants.S_OK;
         }
@@ -90,8 +91,8 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int GetLanguageInfo(ref string pbstrLanguage, ref Guid pguidLanguage)
         {
-            pbstrLanguage = MonoGuids.LanguageName;
-            pguidLanguage = MonoGuids.LanguageGuid;
+            pbstrLanguage = AD7Guids.LanguageName;
+            pguidLanguage = AD7Guids.LanguageGuid;
             return VSConstants.S_OK;
         }
 
