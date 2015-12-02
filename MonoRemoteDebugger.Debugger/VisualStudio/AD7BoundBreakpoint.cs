@@ -46,15 +46,15 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int GetState(enum_BP_STATE[] pState)
         {
             pState[0] = 0;
-            if (_pendingBreakpoint.IsDeleted)
+            if (_pendingBreakpoint.Deleted)
             {
                 pState[0] = enum_BP_STATE.BPS_DELETED;
             }
-            else if (_pendingBreakpoint.IsEnabled)
+            else if (_pendingBreakpoint.Enabled)
             {
                 pState[0] = enum_BP_STATE.BPS_ENABLED;
             }
-            else if (!_pendingBreakpoint.IsEnabled)
+            else if (!_pendingBreakpoint.Enabled)
             {
                 pState[0] = enum_BP_STATE.BPS_DISABLED;
             }

@@ -33,7 +33,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             _pBPRequest = pBPRequest;
             _engine = engine;
 
-            IsEnabled = true;
+            Enabled = true;
 
             var docPosition =
                 (IDebugDocumentPosition2) Marshal.GetObjectForIUnknown(_bpRequestInfo.bpLocation.unionmember2);
@@ -52,9 +52,9 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             EndColumn = (int) endPosition[0].dwColumn;
         }
 
-        public bool IsBound { get; set; }
-        public bool IsEnabled { get; private set; }
-        public bool IsDeleted { get; private set; }
+        public bool Bound { get; set; }
+        public bool Enabled { get; private set; }
+        public bool Deleted { get; private set; }
         public int StartLine { get; private set; }
         public int StartColumn { get; private set; }
         public int EndLine { get; private set; }
@@ -87,12 +87,14 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int Delete()
         {
+            //Deleted = true;
+            
             return VSConstants.S_OK;
         }
 
         public int Enable(int fEnable)
         {
-            IsEnabled = fEnable != 0;
+            Enabled = fEnable != 0;
             return VSConstants.S_OK;
         }
 
@@ -116,15 +118,15 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int GetState(PENDING_BP_STATE_INFO[] pState)
         {
-            if (IsDeleted)
+            if (Deleted)
             {
                 pState[0].state = enum_PENDING_BP_STATE.PBPS_DELETED;
             }
-            else if (IsEnabled)
+            else if (Enabled)
             {
                 pState[0].state = enum_PENDING_BP_STATE.PBPS_ENABLED;
             }
-            else if (!IsEnabled)
+            else if (!Enabled)
             {
                 pState[0].state = enum_PENDING_BP_STATE.PBPS_DISABLED;
             }

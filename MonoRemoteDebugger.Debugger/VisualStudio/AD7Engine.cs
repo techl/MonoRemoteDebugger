@@ -14,17 +14,21 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         private readonly AsyncDispatcher _dispatcher = new AsyncDispatcher();
         private Guid _programId;
 
-        public AD7Engine()
-        {
-            Instance = this;
-        }
-
         public static AD7Engine Instance { get; private set; }
 
         public DebuggedProcess DebuggedProcess { get; private set; }
         public MonoDebuggerEvents Callback { get; private set; }
         public AD7ProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
+
+        public AD7Engine()
+        {
+            //This call is to initialize the global service provider while we are still on the main thread.
+            //Do not remove this this, even though the return value goes unused.
+            var globalProvider = Microsoft.VisualStudio.Shell.ServiceProvider.GlobalProvider;
+
+            Instance = this;
+        }
 
         public int Attach(IDebugProgram2[] rgpPrograms, IDebugProgramNode2[] rgpProgramNodes, uint celtPrograms,
             IDebugEventCallback2 pCallback, enum_ATTACH_REASON dwReason)
@@ -121,17 +125,17 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             return VSConstants.S_OK;
         }
 
-        public int LaunchSuspended(string pszServer, IDebugPort2 pPort, string pszExe, string pszArgs, string pszDir,
-            string bstrEnv, string pszOptions, enum_LAUNCH_FLAGS dwLaunchFlags, uint hStdInput, uint hStdOutput,
-            uint hStdError, IDebugEventCallback2 pCallback, out IDebugProcess2 ppProcess)
+        public int LaunchSuspended(string pszServer, IDebugPort2 port, string exe, string args, string dir,
+            string env, string options, enum_LAUNCH_FLAGS launchFlags, uint hStdInput, uint hStdOutput,
+            uint hStdError, IDebugEventCallback2 ad7Callback, out IDebugProcess2 process)
         {
             DebugHelper.TraceEnteringMethod();
 
-            Callback = new MonoDebuggerEvents(this, pCallback);
-            DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(pszArgs));
+            Callback = new MonoDebuggerEvents(this, ad7Callback);
+            DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(args));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
 
-            ppProcess = RemoteProcess = new MonoProcess(pPort);
+            process = RemoteProcess = new MonoProcess(port);
             return VSConstants.S_OK;
         }
 

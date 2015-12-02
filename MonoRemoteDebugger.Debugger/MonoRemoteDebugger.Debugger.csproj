@@ -125,6 +125,7 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Contracts\IDebugSession.cs" />
+    <Compile Include="MIDebugEngine\Engine.Impl\WorkerThread.cs" />
     <Compile Include="VisualStudio\DebuggedProcess.cs" />
     <Compile Include="VisualStudio\DebuggedMonoThread.cs" />
     <Compile Include="MIDebugEngine\AD7.Impl\AD7Enums.cs" />

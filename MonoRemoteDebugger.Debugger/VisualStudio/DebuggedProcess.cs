@@ -106,24 +106,45 @@ namespace Microsoft.MIDebugEngine
 
         private bool HandleEventSet(Event ev)
         {
-            if (ev.EventType == EventType.Breakpoint)
-            {
-                HandleBreakPoint((BreakpointEvent) ev);
-                return currentStepRequest != null && currentStepRequest.Enabled;
-            }
-            if (ev.EventType == EventType.Step)
-            {
-                HandleStep((StepEvent) ev);
-                return false;
-            }
             switch (ev.EventType)
             {
+                case EventType.VMStart:
+                    break;
+                case EventType.ThreadStart:
+                    break;
+                case EventType.ThreadDeath:
+                    break;
+                case EventType.AppDomainCreate:
+                    break;
+                case EventType.AppDomainUnload:
+                    break;
+                case EventType.MethodEntry:
+                    break;
+                case EventType.MethodExit:
+                    break;
+                case EventType.AssemblyLoad:
+                    break;
+                case EventType.AssemblyUnload:
+                    break;
+                case EventType.Breakpoint:
+                    HandleBreakPoint((BreakpointEvent)ev);
+                    return currentStepRequest != null && currentStepRequest.Enabled;
+                case EventType.Step:
+                    HandleStep((StepEvent)ev);
+                    return false;
                 case EventType.TypeLoad:
-                    var typeEvent = (TypeLoadEvent) ev;
+                    var typeEvent = (TypeLoadEvent)ev;
                     RegisterType(typeEvent.Type);
                     if (TryBindBreakpoints() != 0)
                         return false;
-
+                    break;
+                case EventType.Exception:
+                    break;
+                case EventType.KeepAlive:
+                    break;
+                case EventType.UserBreak:
+                    break;
+                case EventType.UserLog:
                     break;
                 case EventType.VMDeath:
                 case EventType.VMDisconnect:
@@ -158,7 +179,7 @@ namespace Microsoft.MIDebugEngine
 
             try
             {
-                foreach (AD7PendingBreakpoint bp in _pendingBreakpoints.Where(x => !x.IsBound))
+                foreach (AD7PendingBreakpoint bp in _pendingBreakpoints.Where(x => !x.Bound))
                 {
                     MonoBreakpointLocation location;
                     if (bp.TryBind(_types, out location))
@@ -170,7 +191,7 @@ namespace Microsoft.MIDebugEngine
 
                             BreakpointEventRequest request = _vm.SetBreakpoint(location.Method, ilOffset);
                             request.Enable();
-                            bp.IsBound = true;
+                            bp.Bound = true;
                             bp.LastRequest = request;
                             _engine.Callback.BoundBreakpoint(bp);
                             _vm.Resume();
@@ -188,7 +209,6 @@ namespace Microsoft.MIDebugEngine
             {
                 logger.Error("Cant bind breakpoint: " + ex);
             }
-
 
             return countBounded;
         }
