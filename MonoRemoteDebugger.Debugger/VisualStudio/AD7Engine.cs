@@ -17,7 +17,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public static AD7Engine Instance { get; private set; }
 
         public DebuggedProcess DebuggedProcess { get; private set; }
-        public MonoDebuggerEvents Callback { get; private set; }
+        public EngineCallback Callback { get; private set; }
         public AD7ProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
 
@@ -131,7 +131,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             DebugHelper.TraceEnteringMethod();
 
-            Callback = new MonoDebuggerEvents(this, ad7Callback);
+            Callback = new EngineCallback(this, ad7Callback);
             DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(args));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
 

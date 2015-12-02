@@ -13,14 +13,14 @@ namespace Microsoft.MIDebugEngine
         private readonly DebuggedProcess debuggedMonoProcess;
         private string _threadName = "Mono Thread";
 
+        public ThreadMirror ThreadMirror { get; private set; }
+
         public AD7Thread(DebuggedProcess debuggedMonoProcess, AD7Engine engine, ThreadMirror threadMirror)
         {
             this.debuggedMonoProcess = debuggedMonoProcess;
             _engine = engine;
             ThreadMirror = threadMirror;
         }
-
-        public ThreadMirror ThreadMirror { get; private set; }
 
         public int CanSetNextStatement(IDebugStackFrame2 pStackFrame, IDebugCodeContext2 pCodeContext)
         {
@@ -30,8 +30,7 @@ namespace Microsoft.MIDebugEngine
         public int EnumFrameInfo(enum_FRAMEINFO_FLAGS dwFieldSpec, uint nRadix, out IEnumDebugFrameInfo2 ppEnum)
         {
             StackFrame[] stackFrames = ThreadMirror.GetFrames();
-            ppEnum =
-                new AD7FrameInfoEnum(stackFrames.Select(x => new AD7StackFrame(this, debuggedMonoProcess, x).GetFrameInfo(dwFieldSpec)).ToArray());
+            ppEnum = new AD7FrameInfoEnum(stackFrames.Select(x => new AD7StackFrame(_engine, this, x).GetFrameInfo(dwFieldSpec)).ToArray());
             return VSConstants.S_OK;
         }
 

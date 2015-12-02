@@ -43,6 +43,18 @@ namespace Microsoft.MIDebugEngine
             get { return _types; }
         }
 
+        public VirtualMachine VM
+        {
+            get
+            {
+                return _vm;
+            }
+            set
+            {
+                _vm = value;
+            }
+        }
+
         public event EventHandler ApplicationClosed;
 
         internal void StartDebugging()

@@ -4,12 +4,12 @@ using Microsoft.MIDebugEngine;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    public class MonoDebuggerEvents
+    public class EngineCallback
     {
         private readonly IDebugEventCallback2 _callback;
         private readonly AD7Engine _engine;
 
-        public MonoDebuggerEvents(AD7Engine engine, IDebugEventCallback2 pCallback)
+        public EngineCallback(AD7Engine engine, IDebugEventCallback2 pCallback)
         {
             _engine = engine;
             _callback = pCallback;

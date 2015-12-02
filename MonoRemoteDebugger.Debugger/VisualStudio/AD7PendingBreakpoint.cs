@@ -87,7 +87,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int Delete()
         {
-            //Deleted = true;
+            Deleted = true;
             
             return VSConstants.S_OK;
         }

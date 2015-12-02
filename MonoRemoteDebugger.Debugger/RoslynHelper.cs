@@ -10,6 +10,8 @@ using MonoRemoteDebugger.Debugger.VisualStudio;
 using NLog;
 using Location = Microsoft.CodeAnalysis.Location;
 using System.IO;
+using Microsoft.MIDebugEngine;
+using Microsoft.VisualStudio.Debugger.Interop;
 
 namespace MonoRemoteDebugger.Debugger
 {
@@ -17,7 +19,7 @@ namespace MonoRemoteDebugger.Debugger
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        internal static StatementRange GetStatementRange(string fileName, int startLine, int startColumn)
+        internal static MITextPosition GetStatementRange(string fileName, int startLine, int startColumn)
         {
             try
             {
@@ -33,30 +35,26 @@ namespace MonoRemoteDebugger.Debugger
                     SyntaxNode node = root.FindNode(span, false, false);
 
                     if (node is BlockSyntax)
-                        return MapBlockSyntax(span, node);
+                        return MapBlockSyntax(span, node, fileName);
                     while (node is TypeSyntax || node is MemberAccessExpressionSyntax)
                         node = node.Parent;
 
                     Location location = node.GetLocation();
                     FileLinePositionSpan mapped = location.GetMappedLineSpan();
 
-                    return new StatementRange
-                    {
-                        StartLine = mapped.StartLinePosition.Line,
-                        StartColumn = mapped.StartLinePosition.Character,
-                        EndLine = mapped.EndLinePosition.Line,
-                        EndColumn = mapped.EndLinePosition.Character,
-                    };
+                    return new MITextPosition(fileName,
+                        new TEXT_POSITION() { dwLine = (uint)mapped.StartLinePosition.Line, dwColumn = (uint)mapped.StartLinePosition.Character },
+                        new TEXT_POSITION() { dwLine = (uint)mapped.EndLinePosition.Line, dwColumn = (uint)mapped.EndLinePosition.Character });
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Trace($"Exception : {ex}");
                 return null;
             }
         }
 
-        private static StatementRange MapBlockSyntax(TextSpan span, SyntaxNode node)
+        private static MITextPosition MapBlockSyntax(TextSpan span, SyntaxNode node, string fileName)
         {
             var block = (BlockSyntax)node;
             bool start = Math.Abs(block.SpanStart - span.Start) < Math.Abs(block.Span.End - span.Start);
@@ -66,24 +64,17 @@ namespace MonoRemoteDebugger.Debugger
 
             if (start)
             {
-                return new StatementRange
-                {
-                    StartLine = mapped.StartLinePosition.Line,
-                    StartColumn = mapped.StartLinePosition.Character,
-                    EndLine = mapped.StartLinePosition.Line,
-                    EndColumn = mapped.StartLinePosition.Character + 1,
-                };
+                return new MITextPosition(fileName,
+                    new TEXT_POSITION() { dwLine = (uint)mapped.StartLinePosition.Line, dwColumn = (uint)mapped.StartLinePosition.Character },
+                    new TEXT_POSITION() { dwLine = (uint)mapped.StartLinePosition.Line, dwColumn = (uint)mapped.StartLinePosition.Character + 1 });
             }
-            return new StatementRange
-            {
-                StartLine = mapped.EndLinePosition.Line,
-                StartColumn = mapped.EndLinePosition.Character - 1,
-                EndLine = mapped.EndLinePosition.Line,
-                EndColumn = mapped.EndLinePosition.Character,
-            };
+
+            return new MITextPosition(fileName,
+                new TEXT_POSITION() { dwLine = (uint)mapped.EndLinePosition.Line, dwColumn = (uint)mapped.EndLinePosition.Character - 1 },
+                new TEXT_POSITION() { dwLine = (uint)mapped.EndLinePosition.Line, dwColumn = (uint)mapped.EndLinePosition.Character });
         }
 
-        internal static StatementRange GetILOffset(AD7PendingBreakpoint bp, MethodMirror methodMirror, out int ilOffset)
+        internal static void GetILOffset(AD7PendingBreakpoint bp, MethodMirror methodMirror, out int ilOffset)
         {
             List<Mono.Debugger.Soft.Location> locations = methodMirror.Locations.ToList();
 
@@ -100,7 +91,7 @@ namespace MonoRemoteDebugger.Debugger
                 ilOffset = location.ILOffset;
 
                 Console.WriteLine(location.ColumnNumber);
-                return null;
+                return;
             }
 
             throw new Exception("Cant bind breakpoint");

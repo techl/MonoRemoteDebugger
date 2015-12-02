@@ -82,8 +82,9 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Mono.Debugger.Soft">
-      <HintPath>..\MonoRemoteDebugger.VSExtension\External\Mono.Debugger.Soft.dll</HintPath>
+    <Reference Include="Mono.Debugger.Soft, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Assemblies\Mono.Debugger.Soft.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.2.1\lib\net45\NLog.dll</HintPath>
@@ -125,6 +126,7 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Contracts\IDebugSession.cs" />
+    <Compile Include="MIDebugEngine\Engine.Impl\EngineUtils.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\WorkerThread.cs" />
     <Compile Include="VisualStudio\DebuggedProcess.cs" />
     <Compile Include="VisualStudio\DebuggedMonoThread.cs" />
@@ -134,7 +136,6 @@
     <Compile Include="MIDebugEngine\Engine.Impl\MITextPosition.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\Structures.cs" />
     <Compile Include="RoslynHelper.cs" />
-    <Compile Include="StatementRange.cs" />
     <Compile Include="VisualStudio\AD7BoundBreakpoint.cs" />
     <Compile Include="VisualStudio\MonoBreakpointLocation.cs" />
     <Compile Include="VisualStudio\MonoDocument.cs" />
@@ -144,7 +145,7 @@
     <Compile Include="VisualStudio\AD7Guids.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="Enums\SteppingTypeEnum.cs" />
-    <Compile Include="VisualStudio\MonoDebuggerEvents.cs" />
+    <Compile Include="VisualStudio\EngineCallback.cs" />
     <Compile Include="VisualStudio\AD7DocumentContext.cs" />
     <Compile Include="VisualStudio\AD7Engine.cs" />
     <Compile Include="VisualStudio\AD7ProgramNode.cs" />
@@ -152,7 +153,6 @@
     <Compile Include="VisualStudio\MonoProperty.cs" />
     <Compile Include="VisualStudio\AD7StackFrame.cs" />
     <Compile Include="VisualStudio\AD7Thread.cs" />
-    <Compile Include="TextPosition.cs" />
     <Compile Include="TypeSummary.cs" />
     <Compile Include="VisualStudio\AD7Expression.cs" />
   </ItemGroup>
