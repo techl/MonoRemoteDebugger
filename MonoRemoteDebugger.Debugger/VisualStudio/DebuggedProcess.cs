@@ -12,6 +12,7 @@ using NLog;
 using MonoRemoteDebugger.Debugger;
 using System.Globalization;
 using MICore;
+using MonoRemoteDebugger.Debugger.DebugEngineHost;
 
 namespace Microsoft.MIDebugEngine
 {
@@ -179,6 +180,8 @@ namespace Microsoft.MIDebugEngine
                 case EventType.UserBreak:
                     break;
                 case EventType.UserLog:
+                    UserLogEvent e = (UserLogEvent)ev;
+                    HostOutputWindowEx.WriteLaunchError(e.Message);
                     break;
                 case EventType.VMDeath:
                 case EventType.VMDisconnect:
