@@ -54,7 +54,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int GetHostPid(AD_PROCESS_ID[] pHostProcessId)
         {
             DebugHelper.TraceEnteringMethod();
-            pHostProcessId[0].ProcessIdType = (uint) enum_AD_PROCESS_ID.AD_PROCESS_ID_GUID;
+            pHostProcessId[0].ProcessIdType = (uint)enum_AD_PROCESS_ID.AD_PROCESS_ID_GUID;
             pHostProcessId[0].guidProcessId = _processId;
             return VSConstants.S_OK;
         }

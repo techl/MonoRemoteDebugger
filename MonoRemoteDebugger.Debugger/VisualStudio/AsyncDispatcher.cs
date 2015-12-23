@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,9 +18,16 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         private void Run()
         {
-            foreach (Action action in actions.GetConsumingEnumerable(cts.Token))
+            try
             {
-                action();
+                foreach (Action action in actions.GetConsumingEnumerable(cts.Token))
+                {
+                    action();
+                }
+            }
+            catch(Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
             }
         }
 

@@ -80,11 +80,11 @@ namespace Microsoft.MIDebugEngine
             _engine = engine;
         }
 
-        //public static void Send(AD7Engine engine)
-        //{
-        //    AD7EngineCreateEvent eventObject = new AD7EngineCreateEvent(engine);
-        //    engine.Callback.Send(eventObject, IID, null, null);
-        //}
+        public static void Send(AD7Engine engine)
+        {
+            AD7EngineCreateEvent eventObject = new AD7EngineCreateEvent(engine);
+            engine.Callback.Send(eventObject, IID, null, null);
+        }
 
         int IDebugEngineCreateEvent2.GetEngine(out IDebugEngine2 engine)
         {
@@ -99,11 +99,11 @@ namespace Microsoft.MIDebugEngine
     {
         public const string IID = "96CD11EE-ECD4-4E89-957E-B5D496FC4139";
 
-        //internal static void Send(AD7Engine engine)
-        //{
-        //    AD7ProgramCreateEvent eventObject = new AD7ProgramCreateEvent();
-        //    engine.Callback.Send(eventObject, IID, engine, null);
-        //}
+        internal static void Send(AD7Engine engine)
+        {
+            AD7ProgramCreateEvent eventObject = new AD7ProgramCreateEvent();
+            engine.Callback.Send(eventObject, IID, engine, null);
+        }
     }
 
 
@@ -574,34 +574,34 @@ namespace Microsoft.MIDebugEngine
         #endregion
     }
 
-    //internal sealed class AD7CustomDebugEvent : AD7AsynchronousEvent, IDebugCustomEvent110
-    //{
-    //    public const string IID = "2615D9BC-1948-4D21-81EE-7A963F20CF59";
+    internal sealed class AD7CustomDebugEvent : AD7AsynchronousEvent, IDebugCustomEvent110
+    {
+        public const string IID = "2615D9BC-1948-4D21-81EE-7A963F20CF59";
 
-    //    private readonly Guid _guidVSService;
-    //    private readonly Guid _sourceId;
-    //    private readonly int _messageCode;
-    //    private readonly object _parameter1;
-    //    private readonly object _parameter2;
+        private readonly Guid _guidVSService;
+        private readonly Guid _sourceId;
+        private readonly int _messageCode;
+        private readonly object _parameter1;
+        private readonly object _parameter2;
 
-    //    public AD7CustomDebugEvent(Guid guidVSService, Guid sourceId, int messageCode, object parameter1, object parameter2)
-    //    {
-    //        _guidVSService = guidVSService;
-    //        _sourceId = sourceId;
-    //        _messageCode = messageCode;
-    //        _parameter1 = parameter1;
-    //        _parameter2 = parameter2;
-    //    }
+        public AD7CustomDebugEvent(Guid guidVSService, Guid sourceId, int messageCode, object parameter1, object parameter2)
+        {
+            _guidVSService = guidVSService;
+            _sourceId = sourceId;
+            _messageCode = messageCode;
+            _parameter1 = parameter1;
+            _parameter2 = parameter2;
+        }
 
-    //    int IDebugCustomEvent110.GetCustomEventInfo(out Guid guidVSService, VsComponentMessage[] message)
-    //    {
-    //        guidVSService = _guidVSService;
-    //        message[0].SourceId = _sourceId;
-    //        message[0].MessageCode = (uint)_messageCode;
-    //        message[0].Parameter1 = _parameter1;
-    //        message[0].Parameter2 = _parameter2;
+        int IDebugCustomEvent110.GetCustomEventInfo(out Guid guidVSService, VsComponentMessage[] message)
+        {
+            guidVSService = _guidVSService;
+            message[0].SourceId = _sourceId;
+            message[0].MessageCode = (uint)_messageCode;
+            message[0].Parameter1 = _parameter1;
+            message[0].Parameter2 = _parameter2;
 
-    //        return Constants.S_OK;
-    //    }
-    //}
+            return Constants.S_OK;
+        }
+    }
 }

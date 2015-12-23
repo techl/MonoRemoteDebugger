@@ -18,7 +18,6 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public DebuggedProcess DebuggedProcess { get; private set; }
         public EngineCallback Callback { get; private set; }
-        public AD7ProgramNode Node { get; private set; }
         public MonoProcess RemoteProcess { get; private set; }
 
         public AD7Engine()
@@ -42,6 +41,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             Callback.EngineCreated();
             Callback.ProgramCreated();
 
+            this.ProgramCreateEventSent = true;
 
             return VSConstants.S_OK;
         }
@@ -134,6 +134,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             Callback = new EngineCallback(this, ad7Callback);
             DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(args));
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
+            DebuggedProcess.StartDebugging();
 
             process = RemoteProcess = new MonoProcess(port);
             return VSConstants.S_OK;
@@ -150,7 +151,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             IDebugPortNotify2 notify;
             defaultPort.GetPortNotify(out notify);
 
-            int result = notify.AddProgramNode(Node = new AD7ProgramNode(DebuggedProcess, id));
+            int result = notify.AddProgramNode(new AD7ProgramNode(DebuggedProcess, id));
 
             return VSConstants.S_OK;
         }
@@ -299,6 +300,12 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         {
             _dispatcher.Stop();
             Callback.ProgramDestroyed(this);
+        }
+
+        internal bool ProgramCreateEventSent
+        {
+            get;
+            private set;
         }
     }
 }

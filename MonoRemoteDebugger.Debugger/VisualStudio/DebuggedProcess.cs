@@ -24,6 +24,7 @@ namespace Microsoft.MIDebugEngine
         private AD7Thread _mainThread;
         private VirtualMachine _vm;
 
+        public AD_PROCESS_ID Id { get; private set; }
 
         private StepEventRequest currentStepRequest;
         private bool isStepping;
@@ -34,6 +35,13 @@ namespace Microsoft.MIDebugEngine
             _engine = engine;
             _ipAddress = ipAddress;
             Instance = this;
+
+
+            // we do NOT have real Win32 process IDs, so we use a guid
+            AD_PROCESS_ID pid = new AD_PROCESS_ID();
+            pid.ProcessIdType = (int)enum_AD_PROCESS_ID.AD_PROCESS_ID_GUID;
+            pid.guidProcessId = Guid.NewGuid();
+            this.Id = pid;
         }
 
         public static DebuggedProcess Instance { get; private set; }

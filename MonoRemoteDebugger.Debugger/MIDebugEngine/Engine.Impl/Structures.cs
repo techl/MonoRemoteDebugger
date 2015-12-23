@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.VisualStudio.Debugger.Interop;
 using System.Collections.ObjectModel;
+using MICore;
 //using MICore;
 
 namespace Microsoft.MIDebugEngine
@@ -43,10 +44,11 @@ namespace Microsoft.MIDebugEngine
     //    {
     //        // CLRDBG TODO: Use module id to find the module
 
-    //        if (this.pc.HasValue)
-    //        {
-    //            return process.ResolveAddress(this.pc.Value);
-    //        }
+    //        //techcap TODO
+    //        //if (this.pc.HasValue)
+    //        //{
+    //        //    return process.ResolveAddress(this.pc.Value);
+    //        //}
 
     //        return null;
     //    }
