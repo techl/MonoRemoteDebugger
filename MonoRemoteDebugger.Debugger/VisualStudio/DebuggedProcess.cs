@@ -172,6 +172,12 @@ namespace Microsoft.MIDebugEngine
 
         private void HandleStep(StepEvent stepEvent)
         {
+            if (currentStepRequest != null)
+            {
+                currentStepRequest.Enabled = false;
+                currentStepRequest = null;
+            }
+
             _engine.Callback.StepCompleted(_mainThread);
             logger.Trace("Stepping: {0}:{1}", stepEvent.Method.Name, stepEvent.Location);
 
