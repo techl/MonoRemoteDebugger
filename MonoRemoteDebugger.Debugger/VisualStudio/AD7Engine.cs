@@ -132,7 +132,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             DebugHelper.TraceEnteringMethod();
 
             Callback = new EngineCallback(this, ad7Callback);
-            DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(args));
+            DebuggedProcess = new DebuggedProcess(this, IPAddress.Parse(args), Callback);
             DebuggedProcess.ApplicationClosed += _debuggedProcess_ApplicationClosed;
             DebuggedProcess.StartDebugging();
 
@@ -178,7 +178,9 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         public int Continue(IDebugThread2 pThread)
         {
-            _dispatcher.Queue(() => DebuggedProcess.Continue());
+            // VS Code currently isn't providing a thread Id in certain cases. Work around this by handling null values.
+            AD7Thread thread = pThread as AD7Thread;
+            _dispatcher.Queue(() => DebuggedProcess.Continue(thread?.GetDebuggedThread()));
             return VSConstants.S_OK;
         }
 
@@ -230,10 +232,10 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             return VSConstants.E_NOTIMPL;
         }
 
-        public int Step(IDebugThread2 pThread, enum_STEPKIND sk, enum_STEPUNIT Step)
+        public int Step(IDebugThread2 pThread, enum_STEPKIND sk, enum_STEPUNIT stepUnit)
         {
             var thread = (AD7Thread) pThread;
-            _dispatcher.Queue(() => DebuggedProcess.Step(thread, sk));
+            _dispatcher.Queue(() => DebuggedProcess.Step(thread, sk, stepUnit));
             return VSConstants.S_OK;
         }
 

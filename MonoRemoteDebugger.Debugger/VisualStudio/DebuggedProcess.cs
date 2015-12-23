@@ -10,12 +10,22 @@ using MonoRemoteDebugger.Contracts;
 using MonoRemoteDebugger.Debugger.VisualStudio;
 using NLog;
 using MonoRemoteDebugger.Debugger;
+using System.Globalization;
+using MICore;
 
 namespace Microsoft.MIDebugEngine
 {
     public class DebuggedProcess
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        public AD7Engine Engine
+        {
+            get
+            {
+                return _engine;
+            }
+        }
+
+        private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
         private readonly AD7Engine _engine;
         private readonly IPAddress _ipAddress;
         private readonly List<AD7PendingBreakpoint> _pendingBreakpoints = new List<AD7PendingBreakpoint>();
@@ -24,24 +34,27 @@ namespace Microsoft.MIDebugEngine
         private AD7Thread _mainThread;
         private VirtualMachine _vm;
 
+        private EngineCallback _callback;
         public AD_PROCESS_ID Id { get; private set; }
+        public ProcessState ProcessState { get; private set; }
 
         private StepEventRequest currentStepRequest;
         private bool isStepping;
         private IDebugSession session;
 
-        public DebuggedProcess(AD7Engine engine, IPAddress ipAddress)
+        public DebuggedProcess(AD7Engine engine, IPAddress ipAddress, EngineCallback callback)
         {
             _engine = engine;
             _ipAddress = ipAddress;
             Instance = this;
-
 
             // we do NOT have real Win32 process IDs, so we use a guid
             AD_PROCESS_ID pid = new AD_PROCESS_ID();
             pid.ProcessIdType = (int)enum_AD_PROCESS_ID.AD_PROCESS_ID_GUID;
             pid.guidProcessId = Guid.NewGuid();
             this.Id = pid;
+
+            _callback = callback;
         }
 
         public static DebuggedProcess Instance { get; private set; }
@@ -84,7 +97,8 @@ namespace Microsoft.MIDebugEngine
             EventSet set = _vm.GetNextEventSet();
             if (set.Events.OfType<VMStartEvent>().Any())
             {
-                _mainThread = new AD7Thread(this, _engine, set.Events[0].Thread);
+                //TODO: review by techcap
+                _mainThread = new AD7Thread(_engine, new DebuggedThread(set.Events[0].Thread, _engine));
                 _engine.Callback.ThreadStarted(_mainThread);
 
                 Task.Factory.StartNew(ReceiveThread, TaskCreationOptions.LongRunning);
@@ -147,7 +161,7 @@ namespace Microsoft.MIDebugEngine
                 case EventType.AssemblyUnload:
                     break;
                 case EventType.Breakpoint:
-                    HandleBreakPoint((BreakpointEvent)ev);
+                    HandleBreakPoint(ev.Thread, ev.Request);
                     return currentStepRequest != null && currentStepRequest.Enabled;
                 case EventType.Step:
                     HandleStep((StepEvent)ev);
@@ -192,10 +206,10 @@ namespace Microsoft.MIDebugEngine
             isStepping = false;
         }
 
-        private void HandleBreakPoint(BreakpointEvent bpEvent)
+        private void HandleBreakPoint(ThreadMirror thread, EventRequest request)
         {
-            AD7PendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == bpEvent.Request);
-            StackFrame[] frames = bpEvent.Thread.GetFrames();
+            AD7PendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == request);
+            StackFrame[] frames = thread.GetFrames();
             _engine.Callback.BreakpointHit(bp, _mainThread);
         }
 
@@ -263,15 +277,26 @@ namespace Microsoft.MIDebugEngine
             }
         }
 
+        public void Close()
+        {
+            //if (_launchOptions.DeviceAppLauncher != null)
+            //{
+            //    _launchOptions.DeviceAppLauncher.Terminate();
+            //}
+            //CloseQuietly();
+        }
+
         internal void WaitForAttach()
         {
         }
 
         internal void Break()
         {
+            //TODO: techcap
+            _vm.Suspend();
         }
 
-        internal void Continue()
+        internal void Continue(DebuggedThread thread)
         {
         }
 
@@ -284,6 +309,7 @@ namespace Microsoft.MIDebugEngine
         {
             _vm.Resume();
         }
+
 
         internal void Terminate()
         {
@@ -303,6 +329,11 @@ namespace Microsoft.MIDebugEngine
             }
         }
 
+        public void Detach()
+        {
+            Terminate();
+        }
+
         internal AD7PendingBreakpoint AddPendingBreakpoint(IDebugBreakpointRequest2 pBPRequest)
         {
             var bp = new AD7PendingBreakpoint(_engine, pBPRequest);
@@ -311,7 +342,7 @@ namespace Microsoft.MIDebugEngine
             return bp;
         }
 
-        internal void Step(AD7Thread thread, enum_STEPKIND sk)
+        internal void Step(AD7Thread thread, enum_STEPKIND sk, enum_STEPUNIT stepUnit)
         {
             if (isStepping)
                 return;
@@ -324,20 +355,29 @@ namespace Microsoft.MIDebugEngine
             }
 
             isStepping = true;
-            switch (sk)
+            if (stepUnit == enum_STEPUNIT.STEP_LINE || stepUnit == enum_STEPUNIT.STEP_STATEMENT)
             {
-                case enum_STEPKIND.STEP_INTO:
-                    currentStepRequest.Depth = StepDepth.Into;
-                    break;
-                case enum_STEPKIND.STEP_OUT:
-                    currentStepRequest.Depth = StepDepth.Out;
-                    break;
-                case enum_STEPKIND.STEP_OVER:
-                    currentStepRequest.Depth = StepDepth.Over;
-                    break;
-                default:
-                    return;
+                switch (sk)
+                {
+                    case enum_STEPKIND.STEP_INTO:
+                        currentStepRequest.Depth = StepDepth.Into;
+                        break;
+                    case enum_STEPKIND.STEP_OUT:
+                        currentStepRequest.Depth = StepDepth.Out;
+                        break;
+                    case enum_STEPKIND.STEP_OVER:
+                        currentStepRequest.Depth = StepDepth.Over;
+                        break;
+                    default:
+                        return;
+                }
             }
+            else if (stepUnit == enum_STEPUNIT.STEP_INSTRUCTION)
+            {
+                //TODO: by techcap
+            }
+            else
+                throw new NotImplementedException();
 
             currentStepRequest.Size = StepSize.Line;
             currentStepRequest.Enable();
@@ -355,5 +395,17 @@ namespace Microsoft.MIDebugEngine
             return unixPath.Replace('/', '\\');
         }
         //}
+
+        internal void OnPostedOperationError(object sender, Exception e)
+        {
+            if (this.ProcessState == MICore.ProcessState.Exited)
+            {
+                return; // ignore exceptions after the process has exited
+            }
+
+            string exceptionMessage = e.Message.TrimEnd(' ', '\t', '.', '\r', '\n');
+            string userMessage = string.Format(CultureInfo.CurrentCulture, MICoreResources.Error_ExceptionInOperation, exceptionMessage);
+            _callback.OnError(userMessage);
+        }
     }
 }

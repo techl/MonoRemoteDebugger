@@ -25,7 +25,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
                     action();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Trace.WriteLine(ex.ToString());
             }

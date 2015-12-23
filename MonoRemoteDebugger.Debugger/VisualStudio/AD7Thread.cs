@@ -10,16 +10,17 @@ namespace Microsoft.MIDebugEngine
     internal class AD7Thread : IDebugThread2
     {
         private readonly AD7Engine _engine;
-        private readonly DebuggedProcess debuggedMonoProcess;
+        private readonly DebuggedThread _debuggedThread;
         private string _threadName = "Mono Thread";
 
         public ThreadMirror ThreadMirror { get; private set; }
 
-        public AD7Thread(DebuggedProcess debuggedMonoProcess, AD7Engine engine, ThreadMirror threadMirror)
+        public AD7Thread(AD7Engine engine, DebuggedThread debuggedThread)//ThreadMirror threadMirror)
         {
-            this.debuggedMonoProcess = debuggedMonoProcess;
             _engine = engine;
-            ThreadMirror = threadMirror;
+            
+            ThreadMirror = debuggedThread.Thread;
+            _debuggedThread = debuggedThread;
         }
 
         public int CanSetNextStatement(IDebugStackFrame2 pStackFrame, IDebugCodeContext2 pCodeContext)
@@ -82,6 +83,11 @@ namespace Microsoft.MIDebugEngine
         {
             pdwSuspendCount = 0;
             return VSConstants.E_NOTIMPL;
+        }
+
+        internal DebuggedThread GetDebuggedThread()
+        {
+            return _debuggedThread;
         }
     }
 }
