@@ -131,7 +131,6 @@
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Contracts\IDebugSession.cs" />
-    <Compile Include="MIDebugEngine\AD7.Impl\AD7ProgramNode.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\DebuggedThread.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\EngineUtils.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\WorkerThread.cs" />
