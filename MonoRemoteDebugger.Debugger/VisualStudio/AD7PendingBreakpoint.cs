@@ -88,7 +88,15 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         public int Delete()
         {
             Deleted = true;
-            
+
+            try
+            {
+                LastRequest.Disable();
+            }
+            catch (VMDisconnectedException) { }
+
+            _engine.DebuggedProcess.DeletePendingBreakpoint(this);
+
             return VSConstants.S_OK;
         }
 

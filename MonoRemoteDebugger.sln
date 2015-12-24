@@ -24,11 +24,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoRemoteDebugger.Debugger
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", "{866CF2EE-574D-49C6-89EB-637B56693D24}"
 	ProjectSection(SolutionItems) = preProject
+		Assemblies\Microsoft.DebugEngineHost.dll = Assemblies\Microsoft.DebugEngineHost.dll
 		Assemblies\Microsoft.MICore.dll = Assemblies\Microsoft.MICore.dll
 		Assemblies\Mono.Cecil.dll = Assemblies\Mono.Cecil.dll
 		Assemblies\Mono.Debugger.Soft.dll = Assemblies\Mono.Debugger.Soft.dll
 		Assemblies\Mono.Debugging.dll = Assemblies\Mono.Debugging.dll
 		Assemblies\Mono.Debugging.Soft.dll = Assemblies\Mono.Debugging.Soft.dll
+		Assemblies\Techl.dll = Assemblies\Techl.dll
 	EndProjectSection
 EndProject
 Global

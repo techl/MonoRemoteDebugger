@@ -565,10 +565,14 @@ namespace Microsoft.MIDebugEngine
 
         int IDebugBreakpointEvent2.EnumBreakpoints(out IEnumDebugBoundBreakpoints2 ppEnum)
         {
+            ppEnum = null;
+            if (_boundBreakpoints == null)
+                return Constants.S_OK;
+            else
+                return _boundBreakpoints.EnumBoundBreakpoints(out ppEnum);
+
             //ppEnum = _boundBreakpoints;
             //return Constants.S_OK;
-
-            return _boundBreakpoints.EnumBoundBreakpoints(out ppEnum);
         }
 
         #endregion

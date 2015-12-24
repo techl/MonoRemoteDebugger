@@ -13,6 +13,8 @@ using MonoRemoteDebugger.Debugger;
 using System.Globalization;
 using MICore;
 using MonoRemoteDebugger.Debugger.DebugEngineHost;
+using System.Diagnostics;
+using Techl;
 
 namespace Microsoft.MIDebugEngine
 {
@@ -123,15 +125,14 @@ namespace Microsoft.MIDebugEngine
                 {
                     EventSet set = _vm.GetNextEventSet();
 
-                    bool resume = false;
+                    var type = set.Events.First().EventType;
+                    if (type != EventType.TypeLoad)
+                        Debug.Print($"Event : {set.Events.Select(e => e.EventType).StringJoin(",")}");
+
                     foreach (Event ev in set.Events)
                     {
-                        logger.Trace(ev);
-                        resume = resume || HandleEventSet(ev);
+                        HandleEventSet(ev);
                     }
-
-                    if (resume && _vm != null)
-                        _vm.Resume();
                 }
                 catch (VMNotSuspendedException)
                 {
@@ -139,46 +140,25 @@ namespace Microsoft.MIDebugEngine
             }
         }
 
-        private bool HandleEventSet(Event ev)
+        private void HandleEventSet(Event ev)
         {
-            switch (ev.EventType)
+            var type = ev.EventType;
+
+            switch (type)
             {
-                case EventType.VMStart:
-                    break;
-                case EventType.ThreadStart:
-                    break;
-                case EventType.ThreadDeath:
-                    break;
-                case EventType.AppDomainCreate:
-                    break;
-                case EventType.AppDomainUnload:
-                    break;
-                case EventType.MethodEntry:
-                    break;
-                case EventType.MethodExit:
-                    break;
-                case EventType.AssemblyLoad:
-                    break;
-                case EventType.AssemblyUnload:
-                    break;
                 case EventType.Breakpoint:
-                    HandleBreakPoint(ev.Thread, ev.Request);
-                    return currentStepRequest != null && currentStepRequest.Enabled;
+                    if (!HandleBreakPoint((BreakpointEvent)ev))
+                        return;
+                    break;
                 case EventType.Step:
                     HandleStep((StepEvent)ev);
-                    return false;
+                    return;
                 case EventType.TypeLoad:
                     var typeEvent = (TypeLoadEvent)ev;
                     RegisterType(typeEvent.Type);
-                    if (TryBindBreakpoints() != 0)
-                        return false;
+                    TryBindBreakpoints();
                     break;
-                case EventType.Exception:
-                    break;
-                case EventType.KeepAlive:
-                    break;
-                case EventType.UserBreak:
-                    break;
+
                 case EventType.UserLog:
                     UserLogEvent e = (UserLogEvent)ev;
                     HostOutputWindowEx.WriteLaunchError(e.Message);
@@ -186,13 +166,21 @@ namespace Microsoft.MIDebugEngine
                 case EventType.VMDeath:
                 case EventType.VMDisconnect:
                     Disconnect();
-                    return false;
+                    return;
                 default:
                     logger.Trace(ev);
                     break;
             }
 
-            return true;
+            try
+            {
+                _vm.Resume();
+            }
+            catch (VMNotSuspendedException)
+            {
+                if (type != EventType.VMStart && _vm.Version.AtLeast(2, 2))
+                    throw;
+            }
         }
 
         private void HandleStep(StepEvent stepEvent)
@@ -209,11 +197,24 @@ namespace Microsoft.MIDebugEngine
             isStepping = false;
         }
 
-        private void HandleBreakPoint(ThreadMirror thread, EventRequest request)
+        private bool HandleBreakPoint(BreakpointEvent ev)
         {
-            AD7PendingBreakpoint bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == request);
-            StackFrame[] frames = thread.GetFrames();
+            if (isStepping)
+                return true;
+
+            bool resume = false;
+            
+            AD7PendingBreakpoint bp;
+            lock (_pendingBreakpoints)
+                bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == ev.Request);
+
+            if (bp == null)
+                return true;
+            
+            Mono.Debugger.Soft.StackFrame[] frames = ev.Thread.GetFrames();
             _engine.Callback.BreakpointHit(bp, _mainThread);
+
+            return resume;
         }
 
         private int TryBindBreakpoints()
@@ -222,7 +223,11 @@ namespace Microsoft.MIDebugEngine
 
             try
             {
-                foreach (AD7PendingBreakpoint bp in _pendingBreakpoints.Where(x => !x.Bound))
+                AD7PendingBreakpoint[] pendingList;
+                lock (_pendingBreakpoints)
+                    pendingList = _pendingBreakpoints.Where(x => !x.Bound).ToArray();
+
+                foreach (AD7PendingBreakpoint bp in pendingList)
                 {
                     MonoBreakpointLocation location;
                     if (bp.TryBind(_types, out location))
@@ -237,7 +242,7 @@ namespace Microsoft.MIDebugEngine
                             bp.Bound = true;
                             bp.LastRequest = request;
                             _engine.Callback.BoundBreakpoint(bp);
-                            _vm.Resume();
+                            //_vm.Resume();
                             bp.CurrentThread = _mainThread;
                             countBounded++;
                         }
@@ -299,15 +304,24 @@ namespace Microsoft.MIDebugEngine
             _vm.Suspend();
         }
 
+        /// <summary>
+        /// On First run
+        /// </summary>
+        /// <param name="thread"></param>
         internal void Continue(DebuggedThread thread)
         {
+            //_vm.Resume();
         }
 
-        internal void Resume()
-        {
-            _vm.Resume();
-        }
+        //internal void Resume()
+        //{
+        //    _vm.Resume();
+        //}
 
+        /// <summary>
+        /// For Run
+        /// </summary>
+        /// <param name="debuggedMonoThread"></param>
         internal void Execute(AD7Thread debuggedMonoThread)
         {
             _vm.Resume();
@@ -340,50 +354,59 @@ namespace Microsoft.MIDebugEngine
         internal AD7PendingBreakpoint AddPendingBreakpoint(IDebugBreakpointRequest2 pBPRequest)
         {
             var bp = new AD7PendingBreakpoint(_engine, pBPRequest);
-            _pendingBreakpoints.Add(bp);
+            lock (_pendingBreakpoints)
+                _pendingBreakpoints.Add(bp);
+
             TryBindBreakpoints();
             return bp;
         }
 
+        internal void DeletePendingBreakpoint(AD7PendingBreakpoint breakPoint)
+        {
+            lock (_pendingBreakpoints)
+                _pendingBreakpoints.Remove(breakPoint);
+        }
+
         internal void Step(AD7Thread thread, enum_STEPKIND sk, enum_STEPUNIT stepUnit)
         {
-            if (isStepping)
-                return;
-
-            if (currentStepRequest == null)
-                currentStepRequest = _vm.CreateStepRequest(thread.ThreadMirror);
-            else
+            if (!isStepping)
             {
-                currentStepRequest.Disable();
-            }
-
-            isStepping = true;
-            if (stepUnit == enum_STEPUNIT.STEP_LINE || stepUnit == enum_STEPUNIT.STEP_STATEMENT)
-            {
-                switch (sk)
+                if (currentStepRequest == null)
+                    currentStepRequest = _vm.CreateStepRequest(thread.ThreadMirror);
+                else
                 {
-                    case enum_STEPKIND.STEP_INTO:
-                        currentStepRequest.Depth = StepDepth.Into;
-                        break;
-                    case enum_STEPKIND.STEP_OUT:
-                        currentStepRequest.Depth = StepDepth.Out;
-                        break;
-                    case enum_STEPKIND.STEP_OVER:
-                        currentStepRequest.Depth = StepDepth.Over;
-                        break;
-                    default:
-                        return;
+                    currentStepRequest.Disable();
                 }
-            }
-            else if (stepUnit == enum_STEPUNIT.STEP_INSTRUCTION)
-            {
-                //TODO: by techcap
-            }
-            else
-                throw new NotImplementedException();
 
-            currentStepRequest.Size = StepSize.Line;
-            currentStepRequest.Enable();
+                isStepping = true;
+                if (stepUnit == enum_STEPUNIT.STEP_LINE || stepUnit == enum_STEPUNIT.STEP_STATEMENT)
+                {
+                    switch (sk)
+                    {
+                        case enum_STEPKIND.STEP_INTO:
+                            currentStepRequest.Depth = StepDepth.Into;
+                            break;
+                        case enum_STEPKIND.STEP_OUT:
+                            currentStepRequest.Depth = StepDepth.Out;
+                            break;
+                        case enum_STEPKIND.STEP_OVER:
+                            currentStepRequest.Depth = StepDepth.Over;
+                            break;
+                        default:
+                            return;
+                    }
+                }
+                else if (stepUnit == enum_STEPUNIT.STEP_INSTRUCTION)
+                {
+                    //TODO: by techcap
+                }
+                else
+                    throw new NotImplementedException();
+
+                currentStepRequest.Size = StepSize.Line;
+                currentStepRequest.Enable();
+            }
+
             _vm.Resume();
         }
 
