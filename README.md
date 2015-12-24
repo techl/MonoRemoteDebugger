@@ -3,12 +3,6 @@ MonoRemoteDebugger
 
 MonoRemoteDebugger enables linux remote debugging using Visual Studio 2015.
 
-This project is from MonoDebugger https://github.com/giessweinapps/MonoDebugger
-
-Thanks to Christian Giesswein.
-
-If Christian Giesswein releases new version, this project will be removed.
-
 Usage
 ---
 Run MonoRemoteDebugger.Server on Linux machine.
@@ -18,7 +12,7 @@ Run MonoRemoteDebugger.Server on Linux machine.
 <br>
 
 
-Install MonoRemoteDebugger extension.
+Install MonoRemoteDebugger extension. You can find also in the Visual Studio Gallery.
 
 Run Visual Studio 2015.
 
@@ -31,3 +25,9 @@ Click Connect button.
 Then the program will run and hit the breakpoint which you set on Visual Studio.
 
 Enjoy you debugging.
+
+<br />
+
+This project is inspired from MonoDebugger https://github.com/giessweinapps/MonoDebugger
+
+Thanks to Christian Giesswein.
