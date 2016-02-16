@@ -43,7 +43,16 @@ namespace MonoRemoteDebugger.VSExtension
         {
             var sb = (SolutionBuild2) _dte.Solution.SolutionBuild;
             string project = ((Array) sb.StartupProjects).Cast<string>().First();
-            Project startupProject = _dte.Solution.Item(project);
+            Project startupProject;
+            try
+            {
+                startupProject = _dte.Solution.Item(project);
+            }
+            catch(ArgumentException aex)
+            {
+                throw new ArgumentException($"The parameter '{project}' is incorrect.", aex);
+            }
+
             return startupProject;
         }
 
