@@ -56,7 +56,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             var fields = typeMirror.GetFields();
             var children = properties.Concat(methods).Concat(fields).ToList();
 
-            ppEnum = new AD7PropertyInfoEnum(children.Select(x => new MonoProperty(frame, variable, typeMirror, x).GetDebugPropertyInfo(dwFields)).ToArray());
+            ppEnum = new AD7PropertyEnum(children.Select(x => new MonoProperty(frame, variable, typeMirror, x).GetDebugPropertyInfo(dwFields)).ToArray());
             return VSConstants.S_OK;
         }
 
