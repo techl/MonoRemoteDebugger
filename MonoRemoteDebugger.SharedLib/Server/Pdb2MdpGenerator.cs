@@ -34,8 +34,6 @@ namespace MonoRemoteDebugger.SharedLib.Server
                         logger.Trace("Generate mdp for: " + file);
                         var procInfo = new ProcessStartInfo(MonoUtils.GetPdb2MdbPath(), Path.GetFileName(file));
                         procInfo.WorkingDirectory = dirInfo.FullName;
-                        procInfo.UseShellExecute = false;
-                        procInfo.CreateNoWindow = true;
                         Process proc = Process.Start(procInfo);
                         proc.WaitForExit();
                     }

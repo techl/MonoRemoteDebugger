@@ -9,7 +9,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
         public static string GetMonoPath()
         {
             var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            if ((p == 2) || (p == 4) || (p == 6) || (p == 128))
             {
                 return "mono";
             }
@@ -20,7 +20,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
         public static string GetMonoXsp4()
         {
             var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            if ((p == 2) || (p == 4) || (p == 6) || (p == 128))
             {
                 return "xsp4";
             }
@@ -31,7 +31,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
         public static string GetPdb2MdbPath()
         {
             var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            if ((p == 2) || (p == 4) || (p == 6) || (p == 128))
             {
                 return "pdb2mdb";
             }
