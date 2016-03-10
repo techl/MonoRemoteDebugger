@@ -23,9 +23,6 @@ namespace MonoRemoteDebugger.SharedLib.Server
             directoryName = Path.Combine(root, Path.GetRandomFileName());
             remoteEndpoint = ((IPEndPoint)socket.RemoteEndPoint).Address;
             communication = new TcpCommunication(socket);
-
-            if (!Directory.Exists("MonoRemoteDebugger"))
-                Directory.CreateDirectory("MonoRemoteDebugger");
         }
 
         private string ZipFileName

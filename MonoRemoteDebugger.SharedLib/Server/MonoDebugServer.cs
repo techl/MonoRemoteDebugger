@@ -39,7 +39,8 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
                 logger.Info("Accepted client: " + client.Client.RemoteEndPoint);
                 var clientSession = new ClientSession(client.Client);
-                Task.Factory.StartNew(clientSession.HandleSession, token);
+
+                Task.Factory.StartNew(clientSession.HandleSession, token).Wait();
             }
         }
 
