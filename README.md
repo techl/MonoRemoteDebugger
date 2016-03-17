@@ -13,6 +13,7 @@ Extract MonoRemoteDebugger.Server
 
 Run MonoRemoteDebugger.Server on the linux machine.
 > cd MonoRemoteDebugger.Server
+
 > mono MonoRemoteDebugger.Server.exe
 
 <br>
