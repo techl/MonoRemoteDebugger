@@ -3,6 +3,8 @@ MonoRemoteDebugger
 
 MonoRemoteDebugger enables linux remote debugging using Visual Studio 2015.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/y25a6ymkwrt268s1?svg=true)](https://ci.appveyor.com/project/techcap/monoremotedebugger)
+
 Usage
 ---
 Download MonoRemoteDebugger.Server on the linux machine.
@@ -32,6 +34,12 @@ Click Connect button.
 Then the program will run and hit the breakpoint which you set on Visual Studio.
 
 Enjoy you debugging.
+
+<br />
+
+###Version History
+####v1.0.4
+Fixed conflict with Xamarin VS Extension.
 
 <br />
 
