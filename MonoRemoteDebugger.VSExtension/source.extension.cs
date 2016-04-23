@@ -1,4 +1,4 @@
-namespace MonoRemoteDebugger.VSExtension.VisualStudio
+namespace MonoRemoteDebugger.VSExtension
 {
     static class Vsix
     {

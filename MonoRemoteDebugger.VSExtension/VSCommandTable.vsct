@@ -27,7 +27,7 @@
         <Parent guid="guidMonoDebugger_VS2013CmdSet" id="TopLevelMenuGroup" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <Icon guid="guidImages" id="publish" />
+        <!--<Icon guid="guidImages" id="publish" />-->
         <Strings>
           <ButtonText>Debug with Mono (local)</ButtonText>
         </Strings>
@@ -37,7 +37,7 @@
         <Parent guid="guidMonoDebugger_VS2013CmdSet" id="TopLevelMenuGroup" />
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <Icon guid="guidImages" id="publish" />
+        <!--<Icon guid="guidImages" id="publish" />-->
         <Strings>
           <ButtonText>Debug with Mono (remote)</ButtonText>
         </Strings>
@@ -52,7 +52,7 @@
     </Buttons>
     
     <Bitmaps>
-      <Bitmap guid="guidImages" href="..\Resources\Images.png" usedList="publish"/>      
+      <Bitmap guid="guidImages" href="Resources\Images.png" usedList="publish"/>      
     </Bitmaps> 
   </Commands>
   

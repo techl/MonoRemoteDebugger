@@ -20,7 +20,6 @@ using MonoRemoteDebugger.VSExtension.Views;
 using NLog;
 using Process = System.Diagnostics.Process;
 using Microsoft.MIDebugEngine;
-using MonoRemoteDebugger.VSExtension.VisualStudio;
 
 namespace MonoRemoteDebugger.VSExtension
 {
