@@ -4,7 +4,7 @@ using MonoRemoteDebugger.Debugger.VisualStudio;
 
 namespace MonoRemoteDebugger.VSExtension
 {
-    public static class MonoDebuggerInstaller
+    public static class MonoRemoteDebuggerInstaller
     {
         private const string ENGINE_PATH = @"AD7Metrics\Engine\";
         private const string CLSID_PATH = @"CLSID\";

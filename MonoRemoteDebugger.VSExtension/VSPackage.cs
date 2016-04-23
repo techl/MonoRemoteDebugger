@@ -20,15 +20,16 @@ using MonoRemoteDebugger.VSExtension.Views;
 using NLog;
 using Process = System.Diagnostics.Process;
 using Microsoft.MIDebugEngine;
+using MonoRemoteDebugger.VSExtension.VisualStudio;
 
 namespace MonoRemoteDebugger.VSExtension
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
+    [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
-    [Guid(GuidList.guidMonoDebugger_VS2013PkgString)]
-    public sealed class MonoDebuggerPackage : Package, IDisposable
+    [Guid(PackageGuids.guidMonoDebugger_VS2013PkgString)]
+    public sealed class VSPackage : Package, IDisposable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private MonoVisualStudioExtension monoExtension;
@@ -41,7 +42,7 @@ namespace MonoRemoteDebugger.VSExtension
             UserSettingsManager.Initialize(configurationSettingsStore);
             MonoLogger.Setup();
             base.Initialize();
-            var dte = (DTE) GetService(typeof (DTE));
+            var dte = (DTE)GetService(typeof(DTE));
             monoExtension = new MonoVisualStudioExtension(dte);
             TryRegisterAssembly();
 
@@ -51,7 +52,7 @@ namespace MonoRemoteDebugger.VSExtension
                 Source = new Uri("/MonoRemoteDebugger.VSExtension;component/Resources/Resources.xaml", UriKind.Relative)
             });
 
-            var mcs = GetService(typeof (IMenuCommandService)) as OleMenuCommandService;
+            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             InstallMenu(mcs);
         }
 
@@ -59,21 +60,20 @@ namespace MonoRemoteDebugger.VSExtension
         {
             if (mcs != null)
             {
-                var debugLocally = new CommandID(GuidList.guidMonoDebugger_VS2013CmdSet,
-                    (int) PkgCmdIDList.cmdLocalDebugCode);
+                var debugLocally = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet, (int)PackageIds.cmdLocalDebugCode);
                 var localCmd = new OleMenuCommand(DebugLocalClicked, debugLocally);
                 localCmd.BeforeQueryStatus += cmd_BeforeQueryStatus;
                 mcs.AddCommand(localCmd);
 
 
-                var menuCommandID = new CommandID(GuidList.guidMonoDebugger_VS2013CmdSet,
-                    (int) PkgCmdIDList.cmdRemodeDebugCode);
+                var menuCommandID = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet,
+                    (int)PackageIds.cmdRemodeDebugCode);
                 var cmd = new OleMenuCommand(DebugRemoteClicked, menuCommandID);
                 cmd.BeforeQueryStatus += cmd_BeforeQueryStatus;
                 mcs.AddCommand(cmd);
 
-                var cmdOpenLogFileId = new CommandID(GuidList.guidMonoDebugger_VS2013CmdSet,
-                    (int) PkgCmdIDList.cmdOpenLogFile);
+                var cmdOpenLogFileId = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet,
+                    (int)PackageIds.cmdOpenLogFile);
                 var openCmd = new OleMenuCommand(OpenLogFile, cmdOpenLogFileId);
                 openCmd.BeforeQueryStatus += (o, e) => openCmd.Enabled = File.Exists(MonoLogger.LoggerPath);
                 mcs.AddCommand(openCmd);
@@ -97,7 +97,7 @@ namespace MonoRemoteDebugger.VSExtension
                 if (regKey != null)
                     return;
 
-                string location = typeof (DebuggedProcess).Assembly.Location;
+                string location = typeof(DebuggedProcess).Assembly.Location;
 
                 string regasm = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe";
                 if (!Environment.Is64BitOperatingSystem)
@@ -117,7 +117,7 @@ namespace MonoRemoteDebugger.VSExtension
 
                 using (RegistryKey config = VSRegistry.RegistryRoot(__VsLocalRegistryType.RegType_Configuration))
                 {
-                    MonoDebuggerInstaller.RegisterDebugEngine(location, config);
+                    MonoRemoteDebuggerInstaller.RegisterDebugEngine(location, config);
                 }
             }
             catch (UnauthorizedAccessException)
@@ -137,11 +137,11 @@ namespace MonoRemoteDebugger.VSExtension
             var menuCommand = sender as OleMenuCommand;
             if (menuCommand != null)
             {
-                var dte = GetService(typeof (DTE)) as DTE;
-                var sb = (SolutionBuild2) dte.Solution.SolutionBuild;
+                var dte = GetService(typeof(DTE)) as DTE;
+                var sb = (SolutionBuild2)dte.Solution.SolutionBuild;
                 menuCommand.Visible = sb.StartupProjects != null;
                 if (menuCommand.Visible)
-                    menuCommand.Enabled = ((Array) sb.StartupProjects).Cast<string>().Count() == 1;
+                    menuCommand.Enabled = ((Array)sb.StartupProjects).Cast<string>().Count() == 1;
             }
         }
 
@@ -230,7 +230,7 @@ namespace MonoRemoteDebugger.VSExtension
             GC.SuppressFinalize(this);
         }
 
-        ~MonoDebuggerPackage()
+        ~VSPackage()
         {
             Dispose(false);
         }

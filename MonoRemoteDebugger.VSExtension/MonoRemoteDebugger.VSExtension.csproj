@@ -148,38 +148,41 @@
     </Compile>
     <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="Settings\UserSettingsManager.cs" />
-    <Compile Include="VisualStudio\Guids.cs" />
     <Compile Include="MonoClient\DebugClient.cs" />
     <Compile Include="MonoClient\DebugSession.cs" />
     <Compile Include="MonoClient\MonoServerDiscovery.cs" />
     <Compile Include="MonoClient\MonoServerInformation.cs" />
-    <Compile Include="MonoDebuggerPackage.cs" />
-    <Compile Include="MonoDebuggerInstaller.cs" />
+    <Compile Include="VisualStudio\source.extension.cs">
+      <DependentUpon>source.extension.vsixmanifest</DependentUpon>
+    </Compile>
+    <Compile Include="VSPackage.cs" />
+    <Compile Include="MonoRemoteDebuggerInstaller.cs" />
     <Compile Include="MonoVisualStudioExtension.cs" />
-    <Compile Include="VisualStudio\PkgCmdID.cs" />
+    <Compile Include="VisualStudio\VSCommandTable.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VSCommandTable.vsct</DependentUpon>
+    </Compile>
     <Compile Include="Views\ServersFound.xaml.cs">
       <DependentUpon>ServersFound.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ServersFoundViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="VisualStudio\VSPackage.resx">
-      <MergeWithCTO>true</MergeWithCTO>
-      <ManifestResourceName>VSPackage</ManifestResourceName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="VisualStudio\source.extension.vsixmanifest">
       <SubType>Designer</SubType>
+      <Generator>VsixManifestGenerator</Generator>
+      <LastGenOutput>source.extension.resx</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <VSCTCompile Include="VisualStudio\MonoDebugger.VS2013.vsct">
+    <VSCTCompile Include="VisualStudio\VSCommandTable.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
+      <Generator>VsctGenerator</Generator>
+      <LastGenOutput>VSCommandTable.cs</LastGenOutput>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
@@ -187,32 +190,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ArrowDown.png" />
-    <Resource Include="Resources\MonoLogo.png" />
-    <Content Include="..\Output\Debug\Microsoft.CodeAnalysis.CSharp.dll">
-      <Link>Microsoft.CodeAnalysis.CSharp.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\Output\Debug\Microsoft.CodeAnalysis.dll">
-      <Link>Microsoft.CodeAnalysis.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\Output\Debug\Microsoft.CodeAnalysis.VisualBasic.dll">
-      <Link>Microsoft.CodeAnalysis.VisualBasic.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\Output\Debug\Microsoft.CodeAnalysis.Workspaces.dll">
-      <Link>Microsoft.CodeAnalysis.Workspaces.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\Output\Debug\System.Collections.Immutable.dll">
-      <Link>System.Collections.Immutable.dll</Link>
+    <Content Include="Resources\MonoLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="VisualStudio\License.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoRemoteDebugger.SharedLib\MonoRemoteDebugger.SharedLib.csproj">
@@ -245,6 +230,15 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="VisualStudio\source.extension.resx">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>source.extension.vsixmanifest</DependentUpon>
+      <MergeWithCTO>true</MergeWithCTO>
+      <ManifestResourceName>VSPackage</ManifestResourceName>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>

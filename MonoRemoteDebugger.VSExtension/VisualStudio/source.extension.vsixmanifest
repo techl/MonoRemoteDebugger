@@ -8,8 +8,8 @@
     <Description xml:space="preserve">MonoRemoteDebugger</Description>
     <MoreInfo>https://github.com/techl/MonoRemoteDebugger</MoreInfo>
     <License>VisualStudio\License.txt</License>
-    <Icon>Resources\Package.ico</Icon>
-    <PreviewImage>Resources\Package.ico</PreviewImage>
+    <Icon>MonoLogo.png</Icon>
+    <PreviewImage>MonoLogo.png</PreviewImage>
     <Tags>mono, debugger, remote</Tags>
   </Metadata>
   <Installation InstalledByMsi="false">
