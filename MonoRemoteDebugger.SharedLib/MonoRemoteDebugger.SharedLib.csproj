@@ -89,7 +89,7 @@
     <Compile Include="Server\MonoProcess.cs" />
     <Compile Include="Server\MonoUtils.cs" />
     <Compile Include="Server\MonoWebProcess.cs" />
-    <Compile Include="Server\Pdb2MdpGenerator.cs" />
+    <Compile Include="Server\Pdb2MdbGenerator.cs" />
     <Compile Include="Server\MonoDebugServer.cs" />
     <Compile Include="StartDebuggingMessage.cs" />
     <Compile Include="StatusMessage.cs" />

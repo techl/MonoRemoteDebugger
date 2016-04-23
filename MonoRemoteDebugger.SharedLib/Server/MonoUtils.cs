@@ -6,10 +6,12 @@ namespace MonoRemoteDebugger.SharedLib.Server
 {
     internal static class MonoUtils
     {
+        const PlatformID PlatFormIDUnixUnderNET1 = (PlatformID)128;
+
         public static string GetMonoPath()
         {
-            var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            var p = Environment.OSVersion.Platform;
+            if (p == PlatformID.Unix || p == PlatformID.MacOSX || p == PlatFormIDUnixUnderNET1)
             {
                 return "mono";
             }
@@ -19,8 +21,8 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         public static string GetMonoXsp4()
         {
-            var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            var p = Environment.OSVersion.Platform;
+            if (p == PlatformID.Unix || p == PlatformID.MacOSX || p == PlatFormIDUnixUnderNET1)
             {
                 return "xsp4";
             }
@@ -30,8 +32,8 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         public static string GetPdb2MdbPath()
         {
-            var p = (int) Environment.OSVersion.Platform;
-            if ((p == 4) || (p == 6) || (p == 128))
+            var p = Environment.OSVersion.Platform;
+            if (p == PlatformID.Unix || p == PlatformID.MacOSX || p == PlatFormIDUnixUnderNET1)
             {
                 return "pdb2mdb";
             }
@@ -47,7 +49,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
                 RegistryKey monoKey = localMachine.OpenSubKey(@"Software\Novell\Mono\");
                 var monoVersion = monoKey.GetValue("DefaultCLR") as string;
                 RegistryKey versionKey = localMachine.OpenSubKey(string.Format(@"Software\Novell\Mono\{0}", monoVersion));
-                var path = (string) versionKey.GetValue("SdkInstallRoot");
+                var path = (string)versionKey.GetValue("SdkInstallRoot");
                 return path;
             }
             catch

@@ -23,11 +23,10 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         protected string GetProcessArgs()
         {
-            IPAddress ip = GetLocalIp();
+            IPAddress ip = IPAddress.Any;
             string args =
                 string.Format(
-                    @"--debugger-agent=address={0}:{1},transport=dt_socket,server=y --debug=mdb-optimizations", ip,
-                    _monoDebugPort);
+                    @"--debugger-agent=address={0}:{1},transport=dt_socket,server=y --debug=mdb-optimizations", ip, _monoDebugPort);
             return args;
         }
 
