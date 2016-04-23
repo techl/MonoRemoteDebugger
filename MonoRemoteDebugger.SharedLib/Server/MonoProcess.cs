@@ -23,6 +23,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         protected string GetProcessArgs()
         {
+            //IPAddress ip = GetLocalIp();
             IPAddress ip = IPAddress.Any;
             string args =
                 string.Format(
