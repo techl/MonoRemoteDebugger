@@ -6,7 +6,7 @@
     <DisplayName>MonoRemoteDebugger</DisplayName>
     <Description xml:space="preserve">MonoRemoteDebugger</Description>
     <MoreInfo>https://github.com/techl/MonoRemoteDebugger</MoreInfo>
-    <License>LICENSE</License>
+    <License>LICENSE.txt</License>
     <Icon>Resources\MonoRemoteDebugger.png</Icon>
     <Tags>mono, debugger, remote</Tags>
   </Metadata>

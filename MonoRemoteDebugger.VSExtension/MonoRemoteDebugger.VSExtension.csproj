@@ -170,9 +170,6 @@
     <Compile Include="Views\ServersFoundViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\LICENSE">
-      <Link>LICENSE</Link>
-    </None>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
@@ -194,6 +191,11 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\ArrowDown.png" />
+    <Content Include="..\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\MonoLogo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
