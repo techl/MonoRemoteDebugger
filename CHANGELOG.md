@@ -1,7 +1,7 @@
 # Roadmap
 
-- [x] A feature that has been completed
-- [ ] A feature that has NOT yet been completed
+- [ ] Watch complex objects.
+- [ ] Support worker thread.
 
 Features that have a checkmark are complete and available for
 download in the
@@ -12,18 +12,13 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
-## 1.1
+## 1.0.6
 
-**2016-02-13**
+**2016-05-14**
 
-- [x] Feature 3
-- [x] Feature 4
+- [x] Fixed a bug which cannot find mono path on windows 10 x64
 
-## 1.0
 
-**2016-01-21**
+## 1.0.4
 
-- [x] Initial release
-- [x] Feature 1
-- [x] Feature 2
-  - [x] Sub feature
+- [x] Fixed conflict with Xamarin VS Extension.
