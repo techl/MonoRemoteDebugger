@@ -1,7 +1,7 @@
 # Roadmap
 
 - [ ] Watch complex objects.
-- [ ] Support worker thread.
+- [ ] Support breakpoints on worker threads.
 
 Features that have a checkmark are complete and available for
 download in the
@@ -18,7 +18,29 @@ on the official Visual Studio extension gallery.
 
 - [x] Fixed a bug which cannot find mono path on windows 10 x64
 
+## 1.0.5
+
+- [x] Bug fixed
 
 ## 1.0.4
 
 - [x] Fixed conflict with Xamarin VS Extension.
+
+## 1.0.3
+
+- [x] Bug fixed
+
+
+## 1.0.2
+
+- [x] Support Visual Studio Output Window
+
+- [x] Support deleting Break Point
+
+## 1.0.1
+
+- [x] Support Continue operation
+
+## 1.0.0
+
+- [x] Initial Release
