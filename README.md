@@ -37,12 +37,6 @@ Enjoy you debugging.
 
 <br />
 
-###Version History
-####v1.0.4
-Fixed conflict with Xamarin VS Extension.
+### Version History
+<https://github.com/techl/MonoRemoteDebugger/blob/master/CHANGELOG.md>
 
-<br />
-
-This project is inspired from MonoDebugger https://github.com/giessweinapps/MonoDebugger
-
-Thanks to Christian Giesswein.
