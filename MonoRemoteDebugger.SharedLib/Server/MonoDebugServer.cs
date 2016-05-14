@@ -26,6 +26,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
         {
             tcp = new TcpListener(IPAddress.Any, TcpPort);
             tcp.Start();
+
             listeningTask = Task.Factory.StartNew(() => StartListening(cts.Token), cts.Token);
         }
 
@@ -34,6 +35,12 @@ namespace MonoRemoteDebugger.SharedLib.Server
             while (true)
             {
                 logger.Info("Waiting for client");
+                if (tcp == null)
+                {
+                    token.ThrowIfCancellationRequested();
+                    return;
+                }
+
                 TcpClient client = tcp.AcceptTcpClient();
                 token.ThrowIfCancellationRequested();
 
@@ -53,7 +60,18 @@ namespace MonoRemoteDebugger.SharedLib.Server
                 tcp = null;
             }
             if (listeningTask != null)
-                Task.WaitAll(listeningTask);
+            {
+                try
+                {
+                    if (!Task.WaitAll(new Task[] { listeningTask }, 5000))
+                        logger.Error("listeningTask timeout!!!");
+                }
+                catch(Exception ex)
+                {
+                    logger.Error(ex.ToString());
+                }
+            }
+
             logger.Info("Closed MonoDebugServer");
         }
 

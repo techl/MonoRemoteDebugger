@@ -55,9 +55,9 @@ namespace MonoRemoteDebugger.SharedLib.Server
                     }
                 }
             }
-            catch (XmlException)
+            catch (XmlException xmlException)
             {
-                logger.Info("CommunicationError");
+                logger.Info("CommunicationError : " + xmlException);
             }
             catch (Exception ex)
             {

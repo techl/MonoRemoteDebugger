@@ -12,6 +12,12 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.0.7
+
+**2016-05-14**
+
+- [x] Fixed VS hang bug.
+
 ## 1.0.6
 
 **2016-05-14**

@@ -19,6 +19,9 @@ namespace MonoRemoteDebugger.SharedLib
             LoggerPath = Path.Combine(logPath, "MonoRemoteDebugger.log");
 
             var config = new LoggingConfiguration();
+            var target = new NLog.Targets.DebuggerTarget();
+            config.AddTarget("file", target);
+            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, target));
 
             var fileTarget = new FileTarget { FileName = LoggerPath };
             config.AddTarget("file", fileTarget);
