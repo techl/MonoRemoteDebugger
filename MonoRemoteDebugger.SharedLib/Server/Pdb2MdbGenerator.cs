@@ -32,7 +32,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
                     if (File.Exists(pdbFile))
                     {
                         logger.Trace("Generate mdp for: " + file);
-                        var procInfo = new ProcessStartInfo(MonoUtils.GetPdb2MdbPath(), Path.GetFileName(file));
+                        var procInfo = new ProcessStartInfo(MonoUtils.GetPdb2MdbPath(), $"\"{Path.GetFileName(file)}\"");
                         procInfo.WorkingDirectory = dirInfo.FullName;
                         procInfo.UseShellExecute = false;
                         procInfo.CreateNoWindow = true;

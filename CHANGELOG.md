@@ -12,6 +12,11 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.0.9
+**2016-06-07**
+
+- [x] Fixed the bug that if project name has spaces, it doesn't work.
+
 ## 1.0.8
 **2016-06-06**
 
