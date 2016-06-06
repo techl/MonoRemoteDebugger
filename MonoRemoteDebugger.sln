@@ -29,8 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", 
 	ProjectSection(SolutionItems) = preProject
 		Assemblies\Microsoft.DebugEngineHost.dll = Assemblies\Microsoft.DebugEngineHost.dll
 		Assemblies\Microsoft.MICore.dll = Assemblies\Microsoft.MICore.dll
-		Assemblies\Mono.Cecil.dll = Assemblies\Mono.Cecil.dll
-		Assemblies\Mono.Debugger.Soft.dll = Assemblies\Mono.Debugger.Soft.dll
+		Assemblies\Mono.Debugger.Soft_4.0.4.4.dll = Assemblies\Mono.Debugger.Soft_4.0.4.4.dll
 		Assemblies\Techl.dll = Assemblies\Techl.dll
 	EndProjectSection
 EndProject
