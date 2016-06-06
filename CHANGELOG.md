@@ -12,6 +12,11 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.0.8
+**2016-06-06**
+
+- [x] Changed Mono.Debugger.Soft.dll name for avoiding conflict.
+
 ## 1.0.7
 
 **2016-05-14**
