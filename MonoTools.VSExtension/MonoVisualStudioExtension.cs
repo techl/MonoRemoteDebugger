@@ -35,7 +35,7 @@ namespace MonoTools.VSExtension {
 			return GetAssemblyPath(startupProject);
 		}
 
-		private Project GetStartupProject() {
+		public Project GetStartupProject() {
 			var sb = (SolutionBuild2)_dte.Solution.SolutionBuild;
 			string project = ((Array)sb.StartupProjects).Cast<string>().First();
 			Project startupProject;
@@ -62,22 +62,67 @@ namespace MonoTools.VSExtension {
 
 		internal async Task AttachDebugger(string ipAddress, bool local = false) {
 			string path = GetStartupAssemblyPath();
-			string targetExe = Path.GetFileName(path);
+			string targetExe = null;
 			string outputDirectory = Path.GetDirectoryName(path);
-
+			string url = null;
+			string workingDirectory = null;
+			string arguments = null;
 			Project startup = GetStartupProject();
+			Properties monoHelperProperties = _dte.Properties["MonoTools", "General"];
+			string ports = (string)monoHelperProperties.Item("MonoDebuggerPorts").Value;
 
 			bool isWeb = ((object[])startup.ExtenderNames).Any(x => x.ToString() == "WebApplication");
-			ApplicationTypes appType = isWeb ? ApplicationTypes.WebApplication : ApplicationTypes.DesktopApplication;
-			if (appType == ApplicationTypes.WebApplication)
-				outputDirectory += @"\..\..\";
-			Frameworks framework;
-			var frameworkprop = startup.Properties.OfType<Property>().FirstOrDefault(p => p.Name == "TargetFrameworkVersion");
-			if (frameworkprop != null && string.Compare(frameworkprop.Value.ToString(), "v4.0") < 0) framework = Frameworks.Net2;
-			else framework = Frameworks.Net4;
 
-			var client = new DebugClient(appType, targetExe, Path.GetFullPath(outputDirectory), local, framework);
-			DebugSession session = await client.ConnectToServerAsync(ipAddress);
+			var props = startup.ConfigurationManager.ActiveConfiguration.Properties;
+			foreach (var p in props.OfType<Property>()) {
+				try {
+					System.Diagnostics.Debugger.Log(1, "", $"Property: {p.Name}={p.Value.ToString()}\r\n");
+				} catch { }
+			}
+
+			ApplicationTypes appType = isWeb ? ApplicationTypes.WebApplication : ApplicationTypes.DesktopApplication;
+			if (isWeb) {
+				outputDirectory += @"\..\..\";
+				var ext = startup.Extender["WebApplication"];
+				//TODO read url from extender
+			} else {
+				string action = "0";
+				try {
+					action = props.Item("StartAction")?.Value?.ToString();
+				} catch { }
+				if (action == "1") {
+					try {
+						targetExe = props.Item("StartProgram")?.Value?.ToString();
+					} catch { }
+				} else if (action == "2") {
+					try {
+						url = props.Item("StartURL")?.Value?.ToString();
+						targetExe = null;
+					} catch { }
+				} else {
+					if (!local) targetExe = Path.GetFileName(path);
+					else targetExe = path;
+				}
+				try {
+					arguments = props.Item("StartArguments")?.Value?.ToString();
+					if (arguments == "") arguments = null;
+				} catch { }
+				try {
+					workingDirectory = props.Item("StartWorkingDirectory")?.Value?.ToString();
+					if (workingDirectory == "") workingDirectory = null;
+				} catch { }
+			}
+			Frameworks framework = Frameworks.Net4;
+			try {
+				var frameworkprop = startup.Properties.Item("TargetFrameworkMoniker")?.Value?.ToString().Split(',').Where(t => t.StartsWith("Version=")).Select(t => t.Substring("Version=".Length)).FirstOrDefault();
+				if (frameworkprop != null && string.Compare(frameworkprop, "v4.0") < 0) framework = Frameworks.Net2;
+			} catch { }
+			var client = new DebugClient(appType, targetExe, Path.GetFullPath(outputDirectory), local, framework) {
+				Arguments = arguments,
+				Url = url,
+				WorkingDirectory = workingDirectory
+			};
+			DebugSession session = await client.ConnectToServerAsync(ipAddress, ports);
 			await session.TransferFilesAsync();
 			await session.WaitForAnswerAsync();
 

@@ -12,58 +12,83 @@ namespace MonoTools.Debugger.Library {
 
 	public class StreamedFile {
 		public string Name { get; set; }
-		public virtual Stream Content { get; set; } 
+		public virtual Stream Content { get; set; }
 	}
-	
-	[Serializable]
-	public class FilesCollection: IEnumerable<StreamedFile> {
 
-		static readonly string[] Compressed = new string[] { ".cs", ".vb", ".md", ".config", ".aspx", ".asmx", ".cshtml", ".vbhtml", ".asax", ".sitemap", ".xml", ".ashx", ".txt", ".htm", ".html", ".ascx", ".dll", ".exe", ".bmp" }; 
+	[Serializable]
+	public class FilesCollection : IEnumerable<StreamedFile> {
+
+		static readonly HashSet<string> Compressed = new HashSet<string>(new string[] { ".cs", ".vb", ".md", ".config", ".aspx", ".asmx", ".cshtml",
+			".vbhtml", ".asax", ".sitemap", ".xml", ".ashx", ".txt", ".htm", ".html", ".ascx", ".dll", ".exe", ".bmp", ".svc", ".master", ".axd",".browser",
+			".xmlc", ".asp+", ".armx", ".asbx", ".asp", ".vsdisco", ".pdf", ".xps", ".ps", ".wav", ".svc", ".pdb", ".mdb", ".doc", ".docx", ".dot",
+			".docm", ".dotx", ".xls", ".xlt", ".xlsx", ".xlsm", ".xltx", ".ppt", ".pot", ".pps", ".pptx", ".pptm", ".potx", ".ppsx", ".pub", ".accdb",
+			".accdt", ".fnt", ".fon", ".wof", ".ttf", ".otf", ".woff", ".css", ".js", ".ts", ".coffee", ".less", ".iso", ".bin", ".img", ".vhd", ".vhdx", ".vdi",
+			".vmdk", ".hdd", ".qed", ".qcow", ".vbs", ".ps1" });
 
 		List<string> Files { get; set; }
 		List<string> Directories { get; set; }
 		public string RootPath { get; set; }
+		public bool HasMdbs = false;
+
 		[NonSerialized]
 		Stream stream;
 		[NonSerialized]
 		StreamModes mode;
 		[NonSerialized]
 		TcpCommunication con;
+		[NonSerialized]
+		string[] absoluteFiles;
+
+		public FilesCollection() {
+			Files = new List<string>(); Directories = new List<string>();
+		}
 
 		[OnSerializing]
 		public void RelativePaths(StreamingContext context) {
-			for (int i=0; i<Directories.Count;i++) {
+			var root = RootPath;
+			if (!root.EndsWith(Path.DirectorySeparatorChar.ToString())) root += Path.DirectorySeparatorChar; // append dir separator char
+			for (int i = 0; i<Directories.Count; i++) { // make directories relative
 				var name = Directories[i];
-				if (name.StartsWith(RootPath)) Directories[i] = name.Substring(RootPath.Length).Replace(Path.DirectorySeparatorChar, '/');
+				if (name.StartsWith(root)) Directories[i] = name.Substring(root.Length).Replace(Path.DirectorySeparatorChar, '/');
+				if (name == RootPath) Directories.RemoveAt(i--);
 			}
-			for (int i = 0; i<Files.Count; i++) {
+			absoluteFiles = Files.ToArray(); // save absolute file paths in absoluteFiles
+			for (int i = 0; i<Files.Count; i++) { // make files relative
 				var name = Files[i];
-				if (name.StartsWith(RootPath)) Files[i] = name.Substring(RootPath.Length).Replace(Path.DirectorySeparatorChar, '/'); ;
+				if (name.StartsWith(root)) Files[i] = name.Substring(root.Length).Replace(Path.DirectorySeparatorChar, '/'); ;
 			}
 		}
 
 		[OnDeserialized]
 		public void AbsolutePaths(StreamingContext context) {
-			for (int i = 0; i<Directories.Count; i++) {
+			for (int i = 0; i<Directories.Count; i++) { // make directories absolute
 				var name = Directories[i];
 				if (!Path.IsPathRooted(name)) Directories[i] = Path.Combine(RootPath, name.Replace('/', Path.DirectorySeparatorChar));
 			}
-			for (int i = 0; i<Files.Count; i++) {
+			for (int i = 0; i<Files.Count; i++) { // make files absolute
 				var name = Files[i];
 				if (!Path.IsPathRooted(name)) Files[i] = Path.Combine(RootPath, name.Replace('/', Path.DirectorySeparatorChar));
 			}
-
 		}
 
 		bool NeedsCompression(TcpCommunication connection, string file) {
-			return connection.Compressed && Compressed.Any(ext => file.EndsWith(ext));
+			return connection.Compressed && Compressed.Contains(Path.GetExtension(file));
 		}
 
 		public void Add(string file) {
-			Files.Add(file);
+			var ismdb = file.EndsWith(".dll.mdb") || file.EndsWith(".exe.mdb");
+			if (ismdb) { // check if mdb file is up to date
+				var pdb = file.Substring(0, file.Length-".dll.mdb".Length) + ".pdb";
+				if (File.Exists(pdb) && File.GetLastWriteTimeUtc(pdb) > File.GetLastWriteTimeUtc(file)) return; // outdated mdb file, do not transfer.
+			}
+			if (!file.Contains(".vshost.exe")) Files.Add(file); // omit vshost.exe
+			HasMdbs |= ismdb;
 		}
+
 		public void AddFolder(string path) {
-			Files.AddRange(Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories));
+			var files = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
+				.Where(f => !f.Contains(".vshost.exe")); // omit vshost.exe
+			foreach (var file in files) Add(file);
 			Directories.AddRange(Directory.EnumerateDirectories(path, "*.*", SearchOption.AllDirectories));
 		}
 
@@ -71,26 +96,28 @@ namespace MonoTools.Debugger.Library {
 			con = connection;
 			mode = StreamModes.Write;
 			stream = connection.Stream;
-			byte[] len;
+			var w = new BinaryWriter(stream);
 			foreach (var file in EnumerateFiles()) {
 				if (!string.IsNullOrEmpty(file.Name)) {
-					len = BitConverter.GetBytes(file.Content.Length); // write file content
-					stream.Write(len, 0, len.Length); // write length of file content
+					w.Write(file.Name);
+					w.Write((Int64)file.Content.Length);
 					Stream writer;
 					if (NeedsCompression(connection, file.Name)) writer = new DeflateStream(stream, CompressionLevel.Fastest, true);
-					else writer = stream; 
+					else writer = stream;
 					file.Content.CopyTo(writer);
 				}
 			}
-			len = BitConverter.GetBytes((int)0);
-			stream.Write(len, 0, len.Length); // write 0 length
+			w.Write("");
 		}
 
 		public void Receive(TcpCommunication connection) {
 			con = connection;
 			stream = connection.Stream;
 			foreach (var file in EnumerateFiles()) { // save files contents
-				using (var w = new FileStream(file.Name, FileMode.Create, FileAccess.Write, FileShare.None)) {
+				var path = Path.Combine(RootPath, file.Name);
+				var dir = Path.GetDirectoryName(path);
+				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+				using (var w = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
 					file.Content.CopyTo(w);
 				}
 			}
@@ -98,40 +125,32 @@ namespace MonoTools.Debugger.Library {
 
 		IEnumerable<StreamedFile> EnumerateFiles() {
 			if (mode == StreamModes.Write) { // write
+				int i = 0;
 				foreach (var file in Files) {
-					yield return new StreamedFile { Name = file, Content = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read) };
+					var absFile = absoluteFiles[i++];
+					yield return new StreamedFile { Name = file, Content = new FileStream(absFile, FileMode.Open, FileAccess.Read, FileShare.Read) };
 				}
 			} else { // read
-				var lenbuf = BitConverter.GetBytes((int)0);
-				var n = stream.Read(lenbuf, 0, lenbuf.Length);
-				long len;
-				byte[] str;
-				while (n == lenbuf.Length && (len = BitConverter.ToInt32(lenbuf, 0)) > 0) {
-					str = new byte[len];
-					n = stream.Read(str, 0, (int)len);
-					if (n != len) break;
-					var name = Encoding.UTF8.GetString(str);
-					lenbuf = BitConverter.GetBytes((long)0);
-					n = stream.Read(lenbuf, 0, lenbuf.Length);
-					stream.Flush();
-					if (n != lenbuf.Length) break;
+				var r = new BinaryReader(stream);
+				var name = r.ReadString();
+				while (name != "") {
+					HasMdbs |= name.EndsWith(".dll.mdb") || name.EndsWith(".exe.mdb");
+					var len = r.ReadInt64();
 					Stream reader;
-					long pos;
 					if (NeedsCompression(con, name)) {
 						reader = new DeflateStream(stream, CompressionMode.Decompress, true);
-						pos = 0;
 					} else {
 						reader = stream;
-						pos = stream.Position;
 					}
-					yield return new StreamedFile { Name = name, Content = new BufferedStreamWrapper(reader, StreamModes.Read, pos, BitConverter.ToInt64(lenbuf, 0)) };
+					yield return new StreamedFile { Name = name, Content = new StreamWrapper(reader, len) };
+					name = r.ReadString();
 				}
 			}
 		}
 
 		public IEnumerator<StreamedFile> GetEnumerator() => EnumerateFiles().GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)EnumerateFiles()).GetEnumerator();
-	}	
+	}
 
 	public enum ApplicationTypes { DesktopApplication, WebApplication }
 	public enum Commands : byte { DebugContent, StartedMono, Shutdown }
@@ -151,7 +170,7 @@ namespace MonoTools.Debugger.Library {
 
 
 	[Serializable]
-	public class CommandMessage: Message {
+	public class CommandMessage : Message {
 		public Commands Command { get; set; }
 	}
 
@@ -162,17 +181,30 @@ namespace MonoTools.Debugger.Library {
 		public string Executable { get; set; }
 		public string Arguments { get; set; }
 		public string WorkingDirectory { get; set; }
+		public string Url { get; set; }
+		public bool IsLocal { get; set; }
+		public string LocalPath { get; set; }
+		public bool HasMdbs => Files.HasMdbs;
 		public FilesCollection Files { get; protected set; } = new FilesCollection();
-		public void Send(TcpCommunication con) { if (!con.IsLocal) Files.Send(con); }
-		public void Receive(TcpCommunication con) { if (!con.IsLocal) Files.Receive(con); }
+		public void Send(TcpCommunication con) { if (!IsLocal) Files.Send(con); }
+		public void Receive(TcpCommunication con) {
+			if (!IsLocal) {
+				var oldroot = RootPath; 
+				RootPath = con.RootPath;
+				Files.Receive(con);
+			} else {
+				RootPath = LocalPath;
+			}
+			WorkingDirectory = WorkingDirectory ?? RootPath;
+		}
 		public string RootPath { get { return Files.RootPath; } set { Files.RootPath = value; } }
 	}
 
 	[Serializable]
-	public class StatusMessage: CommandMessage {	}
+	public class StatusMessage : CommandMessage { }
 
 	[Serializable]
-	public class ConsoleOutputMessage: Message {
+	public class ConsoleOutputMessage : Message {
 		public string Text { get; set; }
 	}
 

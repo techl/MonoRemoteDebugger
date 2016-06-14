@@ -36,12 +36,18 @@ namespace MonoTools.Debugger.VSExtension.MonoClient {
 			if (!info.Exists)
 				throw new DirectoryNotFoundException("Directory not found");
 
-			var msg = new DebugMessage();
-			msg.Command = Commands.DebugContent;
-			msg.ApplicationType = type;
-			msg.Framework = framework;
-			msg.Executable = Client.TargetExe;
-			msg.RootPath = rootPath;
+			var msg = new DebugMessage() {
+				Command = Commands.DebugContent,
+				ApplicationType = type,
+				Framework = framework,
+				Executable = Client.TargetExe,
+				Arguments = Client.Arguments,
+				WorkingDirectory = Client.WorkingDirectory,
+				Url = Client.Url,
+				RootPath = rootPath,
+				IsLocal = IsLocal,
+				LocalPath = Client.OutputDirectory
+			};
 			if (!IsLocal) msg.Files.AddFolder(rootPath);
 
 			communication.Send(msg);

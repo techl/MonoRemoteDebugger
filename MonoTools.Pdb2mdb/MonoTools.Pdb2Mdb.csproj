@@ -9,6 +9,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MonoTools.Pdb2Mdb</RootNamespace>
     <AssemblyName>MonoTools.Pdb2Mdb</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\sn.pfx</AssemblyOriginatorKeyFile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -48,6 +50,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BitAccess.cs" />
     <Compile Include="BitSet.cs" />
     <Compile Include="CvInfo.cs" />
@@ -74,7 +80,6 @@
     <Compile Include="PdbSlot.cs" />
     <Compile Include="PdbSource.cs" />
     <Compile Include="PdbWriter.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SourceLocationProvider.cs" />
   </ItemGroup>
   <ItemGroup>

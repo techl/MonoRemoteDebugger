@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using EnvDTE;
 using EnvDTE80;
@@ -16,6 +18,7 @@ using MonoTools.Debugger.Library;
 using MonoTools.Debugger.Debugger;
 using MonoTools.Debugger.VSExtension.Settings;
 using MonoTools.Debugger.VSExtension.Views;
+using MonoTools.Debugger.VSExtension.MonoClient;
 using NLog;
 using Process = System.Diagnostics.Process;
 using Microsoft.MIDebugEngine;
@@ -43,6 +46,7 @@ namespace MonoTools.VSExtension {
 			monoExtension = new MonoVisualStudioExtension(dte);
 			TryRegisterAssembly();
 
+			ErrorList.Initialize(this);
 
 			/* Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary {
 				Source = new Uri("/MonoTools;component/Resources/Resources.xaml", UriKind.Relative)
@@ -86,14 +90,14 @@ namespace MonoTools.VSExtension {
 				mcs.AddCommand(startMonoMenuItem);
 
 				var debugMonoLocallyID = new CommandID(Guids.MonoToolsCmdSet, (int)PkgCmdID.DebugMonoLocal);
-				var localCmd = new OleMenuCommand(DebugLocalClicked, debugMonoLocallyID);
-				localCmd.BeforeQueryStatus += HasStartupProject;
-				mcs.AddCommand(localCmd);
+				var debugMonoCmd = new OleMenuCommand(DebugMonoClicked, debugMonoLocallyID);
+				debugMonoCmd.BeforeQueryStatus += HasStartupProject;
+				mcs.AddCommand(debugMonoCmd);
 
-				var debugMonoRemoteID = new CommandID(Guids.MonoToolsCmdSet, (int)PkgCmdID.DebugMonoRemote);
+				/* var debugMonoRemoteID = new CommandID(Guids.MonoToolsCmdSet, (int)PkgCmdID.DebugMonoRemote);
 				var remoteCmd = new OleMenuCommand(DebugRemoteClicked, debugMonoRemoteID);
 				remoteCmd.BeforeQueryStatus += HasStartupProject;
-				mcs.AddCommand(remoteCmd);
+				mcs.AddCommand(remoteCmd); */
 
 				var logFileID = new CommandID(Guids.MonoToolsCmdSet, (int)PkgCmdID.OpenLogFile);
 				var logFileCmd = new OleMenuCommand(OpenLogFile, logFileID);
@@ -180,11 +184,49 @@ namespace MonoTools.VSExtension {
 				menuCommand.Visible = true;
 				var dte = GetService(typeof(DTE)) as DTE;
 				Array activeSolutionProjects = dte.ActiveSolutionProjects as Array;
+				var proj = activeSolutionProjects.OfType<Project>().FirstOrDefault();
+				menuCommand.Enabled = activeSolutionProjects.Length > 0;
+				string cmd;
+				switch ((uint)menuCommand.CommandID.ID) {
+				case PkgCmdID.AddPdb2MdbToProject: cmd = "Add pdb2mdb to"; break;
+				case PkgCmdID.MoMAProject: cmd = "MoMA"; break;
+				case PkgCmdID.XBuildProject: cmd = "XBuild"; break;
+				case PkgCmdID.XRebuildProject: cmd = "XRebuild"; break;
+				default: throw new NotSupportedException();
+				}
+				menuCommand.Text = cmd + " " + (proj != null ? proj.Name : "Project");
 			}
 		}
 
-		private void DebugLocalClicked(object sender, EventArgs e) {
-			StartLocalServer();
+
+		private readonly CancellationTokenSource cts = new CancellationTokenSource();
+
+		private async void DebugMonoClicked(object sender, EventArgs e) {
+			var dte = GetService(typeof(DTE)) as DTE;
+			var ex = new MonoVisualStudioExtension(dte);
+			var startup = ex.GetStartupProject();
+			bool isWebApp = ((object[])startup.ExtenderNames).Any(x => x.ToString() == "WebApplication");
+			string host = null;
+			if (isWebApp) {
+				var ext = startup.Extender["WebApplication"];
+			} else {
+				try {
+					if (startup.ConfigurationManager.ActiveConfiguration.Properties.Item("RemoteDebugEnabled")?.Value?.ToString().ToLower()  == "true") {
+						host = startup.ConfigurationManager.ActiveConfiguration.Properties.Item("RemoteDebugMachine")?.Value?.ToString();
+					}
+				} catch { }
+			}
+			/* if (host != null) {
+				Properties monoHelperProperties = dte.Properties["MonoTools", "General"];
+				string ports = (string)monoHelperProperties.Item("MonoDebuggerPorts").Value;
+				int msg, debug, discoveryport;
+				MonoDebugServer.ParsePorts(ports, out msg, out debug, out discoveryport);
+				var discovery = new MonoServerDiscovery(discoveryport);
+				var info = await discovery.SearchServer(host, cts.Token);
+				if (info != null) host = info.IpAddress.ToString();
+				else host = null;
+			} */
+			StartDebug(host);
 		}
 
 		private DTE2 GetDTE() {
@@ -223,7 +265,7 @@ namespace MonoTools.VSExtension {
 			Services.MoMAProject(GetDTE());
 		}
 
-		private async void StartLocalServer() {
+		private async void StartDebug(string host) {
 			try {
 				if (server != null) {
 					server.Stop();
@@ -232,18 +274,22 @@ namespace MonoTools.VSExtension {
 
 				monoExtension.BuildSolution();
 
-				using (server = new MonoDebugServer(true)) {
-					server.Start();
-					await monoExtension.AttachDebugger(MonoProcess.GetLocalIp().ToString(), true);
+				if (host == null) {
+					using (server = new MonoDebugServer(true)) {
+						server.Start();
+						await monoExtension.AttachDebugger(MonoProcess.GetLocalIp().ToString(), true);
+					}
+				} else {
+					await monoExtension.AttachDebugger(host, false);
 				}
 			} catch (Exception ex) {
 				logger.Error(ex);
-				if (server != null)
-					server.Stop();
+				if (server != null) server.Stop();
 				MessageBox.Show(ex.Message, "MonoTools.Debugger", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
+		/*
 		private void DebugRemoteClicked(object sender, EventArgs e) {
 			StartSearching();
 		}
@@ -263,7 +309,7 @@ namespace MonoTools.VSExtension {
 					MessageBox.Show(ex.Message, "MonoTools.Debugger", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 			}
-		}
+		} */
 
 		#region IDisposable Members
 		private bool disposed = false;

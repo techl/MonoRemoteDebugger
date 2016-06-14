@@ -40,6 +40,7 @@
 		<Menus>
 			<Menu guid="GuidMonoToolsCmdSet" id="TopLevelMenu" priority="0x700" type="Menu">
 				<Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+				<CommandFlag>DontCache</CommandFlag>
 				<Strings>
 					<ButtonText>Mono</ButtonText>
 					<CommandName>Mono</CommandName>
@@ -101,6 +102,8 @@
 				<Icon guid="BuildProjectIcon" id="Icon" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<CommandFlag>TextMenuUseButton</CommandFlag>
 				<Strings>
 					<ButtonText>XBuild Project</ButtonText>
 				</Strings>
@@ -110,6 +113,8 @@
 				<Parent guid="GuidMonoToolsCmdSet" id="BuildGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<CommandFlag>TextMenuUseButton</CommandFlag>
 				<Strings>
 					<ButtonText>XRebuild Project</ButtonText>
 				</Strings>
@@ -119,6 +124,8 @@
 				<Parent guid="GuidMonoToolsCmdSet" id="BuildGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<CommandFlag>TextMenuUseButton</CommandFlag>
 				<Strings>
 					<ButtonText>Add Pdb2Mdb to Project</ButtonText>
 				</Strings>
@@ -130,7 +137,7 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-					<ButtonText>Start (Mono)</ButtonText>
+					<ButtonText>Start Without Debugging</ButtonText>
 				</Strings>
 			</Button>
 
@@ -140,10 +147,10 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-					<ButtonText>Debug Local (Mono)</ButtonText>
+					<ButtonText>Start Debugging</ButtonText>
 				</Strings>
 			</Button>
-
+<!--
 			<Button guid="GuidMonoToolsCmdSet" id="DebugMonoRemoteID" priority="0x0100" type="Button">
 				<Parent guid="GuidMonoToolsCmdSet" id="DebugGroup" />
 				<Icon guid="DebugIcon" id="Icon" />
@@ -153,7 +160,7 @@
 					<ButtonText>Debug Remote (Mono)</ButtonText>
 				</Strings>
 			</Button>
-
+-->
 			<Button guid="GuidMonoToolsCmdSet" id="OpenLogFileID" priority="0x0100" type="Button">
 				<Parent guid="GuidMonoToolsCmdSet" id="DebugGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
@@ -177,6 +184,8 @@
 				<Parent guid="GuidMonoToolsCmdSet" id="MoMAGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<CommandFlag>TextMenuUseButton</CommandFlag>
 				<Strings>
 					<ButtonText>MoMA Project</ButtonText>
 				</Strings>

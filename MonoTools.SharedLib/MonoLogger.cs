@@ -20,7 +20,8 @@ namespace MonoTools.Debugger.Library
 
             var config = new LoggingConfiguration();
             var target = new NLog.Targets.DebuggerTarget();
-            config.AddTarget("file", target);
+				target.Layout = new NLog.Layouts.SimpleLayout("MonoDebugger: ${message}");
+				config.AddTarget("file", target);
             config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, target));
 
             var fileTarget = new FileTarget { FileName = LoggerPath };

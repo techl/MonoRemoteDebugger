@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using System;
+using System.Reflection;
+using System.IO;
 using NLog;
 
 namespace MonoTools.Debugger.Library {
@@ -8,7 +11,7 @@ namespace MonoTools.Debugger.Library {
 		public string Url { get; private set; }
 		Frameworks Framework { get; set; } = Frameworks.Net4;
 
-		public MonoWebProcess(Frameworks framework = Frameworks.Net4) { Framework = framework; }
+		public MonoWebProcess(Frameworks framework = Frameworks.Net4, string url = null) { Framework = framework; Url = url; }
 
 		internal override Process Start(string workingDirectory) {
 			string monoBin = MonoUtils.GetMonoXsp(Framework);
@@ -19,6 +22,26 @@ namespace MonoTools.Debugger.Library {
 			procInfo.UseShellExecute = false;
 			procInfo.EnvironmentVariables["MONO_OPTIONS"] = args;
 			procInfo.RedirectStandardOutput = true;
+			if (Url != null) {
+				var uri = new Uri(Url);
+				var port = uri.Port;
+				var ssl = uri.Scheme.StartsWith("https");
+				procInfo.Arguments += $" --port={port}";
+				if (ssl) {
+					var a = Assembly.GetExecutingAssembly();
+					var cer = Path.Combine(workingDirectory, "CARoot.cer");
+					var pvk = Path.Combine(workingDirectory, "CARoot.pvk");
+					using (var r = a.GetManifestResourceStream("MonoTools.SharedLib.Server.CARoot.cer"))
+					using (var f = new FileStream(cer, FileMode.Create, FileAccess.Write, FileShare.None)) {
+						r.CopyTo(f);
+					}
+					using (var r = a.GetManifestResourceStream("MonoTools.SharedLib.Server.CARoot.pvk"))
+					using (var f = new FileStream(pvk, FileMode.Create, FileAccess.Write, FileShare.None)) {
+						r.CopyTo(f);
+					}
+					procInfo.Arguments += $" --https --cert=\"{cer}\" --pkfile=\"{pvk}\" --pkpwd=0192iw0192IW";
+				}
+			}
 
 			process = Process.Start(procInfo);
 			Task.Run(() => {

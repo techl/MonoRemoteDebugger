@@ -4,10 +4,11 @@
 	<Metadata>
 		<Identity Id="694ABA35-6EFE-4AC8-8D8B-0B99867C0720" Version="1.0.0" Language="en-US" Publisher="johnshope.com" />
 		<DisplayName>MonoTools</DisplayName>
-		<Description xml:space="preserve">MonoTools. Building, Debugging &amp; MoMA </Description>
+		<Description xml:space="preserve">MonoTools. Building, Debugging &amp; MoMA for Mono in VisualStudio.</Description>
 		<MoreInfo>https://github.com/simonegli8/MonoTools</MoreInfo>
 		<License>LICENSE.txt</License>
-		<Icon>MonoToolsLogo.png</Icon>
+		<Icon>Resources\MonoToolsLogo.png</Icon>
+		<PreviewImage>Resources\MonoToolsLogo.png</PreviewImage>
 		<Tags>mono, tools, debugger, remote</Tags>
 	</Metadata>
 	<Installation>

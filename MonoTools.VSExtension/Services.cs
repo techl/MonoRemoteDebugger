@@ -12,6 +12,7 @@
 	using Mono.Cecil.Pdb;
 	using Mono.Cecil.Mdb;
 	using Microsoft.Win32;
+	using System.Text.RegularExpressions;
 
 	public static class Services {
 
@@ -73,6 +74,26 @@
 			if (source.Count() > 0) MoMA(dte, Path.GetDirectoryName(dte.Solution.FileName), source, false, output);
 		}
 
+		static void MarkErrors(string text) {
+			MonoTools.VSExtension.ErrorList.Clear();
+			var errors = new HashSet<string>();
+			var regex = new Regex(@"(?<=Target Build.*Project ""(?<proj>[^""]*)"" \(default target\(s\)\):.*?)(?<doc>[^ \t\n\r]*)\((?<line>[0-9]+),(?<col>[0-9]+)\):\s*(?<type>error|warning)\s+(?<key>[A-Z0-9]+):(?<msg>[^\r\n]*)\r?\n", RegexOptions.Singleline);
+			foreach (Match m in regex.Matches(text)) {
+				if (errors.Contains(m.Value)) continue;
+				errors.Add(m.Value);
+				var proj = m.Groups["proj"].Value;
+				var doc = m.Groups["doc"].Value;
+				var type = m.Groups["type"].Value;
+				var line = m.Groups["line"].Value;
+				var col = m.Groups["col"].Value;
+				var key = m.Groups["key"].Value;
+				var msg = m.Groups["msg"].Value;
+				//proj = Path.GetFileNameWithoutExtension(proj);
+				if (type == "error") MonoTools.VSExtension.ErrorList.AddError(type + " " + key + ": " + msg, type + " " + key, doc, int.Parse(line), int.Parse(col), proj);
+				else MonoTools.VSExtension.ErrorList.AddWarning(msg, key, doc, int.Parse(line), int.Parse(col), proj);
+			}
+		}
+
 		public static void XBuild(DTE2 dte, bool rebuild = false) {
 			OutputWindowPane outputWindowPane = PrepareOutputWindowPane(dte);
 
@@ -91,7 +112,7 @@
 			string configurationName = dte.Solution.SolutionBuild.ActiveConfiguration.Name;
 			string platformName = ((SolutionConfiguration2)dte.Solution.SolutionBuild.ActiveConfiguration).PlatformName;
 			string fileName = string.Format(@"{0}\bin\xbuild.bat", monoPath);
-			string arguments = string.Format(@"""{0}"" /p:Configuration=""{1}"" /p:Platform=""{2}"" {3}", dte.Solution.FileName,
+			string arguments = string.Format(@"""{0}"" /p:Configuration=""{1}"" /p:Platform=""{2}"" /v:n {3}", dte.Solution.FileName,
 				configurationName, platformName, rebuild ? " /t:Rebuild" : string.Empty);
 
 			// Run XBuild and show in output
@@ -110,9 +131,11 @@
 
 			proc.Start();
 
+			var text = new StringWriter();
+
 			while (!proc.StandardOutput.EndOfStream) {
 				string line = proc.StandardOutput.ReadLine();
-
+				text.WriteLine(line);
 				outputWindowPane.OutputString(line);
 				outputWindowPane.OutputString("\r\n");
 			}
@@ -124,6 +147,8 @@
 				} else {
 					outputWindowPane.OutputString("\r\n\r\nMonoTools: XRebuild Solution End");
 				}
+
+				MarkErrors(text.ToString());
 
 				return;
 			}
@@ -179,7 +204,7 @@
 				string platformName = ((SolutionConfiguration2)dte.Solution.SolutionBuild.ActiveConfiguration).PlatformName;
 				string str4 = string.Format(@"{0}\bin\xbuild.bat", str);
 				object[] args = new object[] { project.FileName, name, platformName, rebuild ? " /t:Rebuild" : string.Empty };
-				string str5 = string.Format("\"{0}\" /p:Configuration=\"{1}\" /p:Platform=\"{2}\" {3}", args);
+				string str5 = string.Format("\"{0}\" /p:Configuration=\"{1}\" /p:Platform=\"{2}\" /v:n {3}", args);
 				System.Diagnostics.Process process1 = new System.Diagnostics.Process();
 				ProcessStartInfo info1 = new ProcessStartInfo {
 					FileName = str4,
@@ -193,9 +218,12 @@
 				outputWindowPane.OutputString(string.Format("MonoHelper: Running {0} {1}\r\n\r\n", str4, str5));
 				Task task = new TaskFactory().StartNew(delegate {
 					proc.Start();
+					var text = new StringWriter();
 					while (!proc.StandardOutput.EndOfStream) {
-						string text = proc.StandardOutput.ReadLine();
-						outputWindowPane.OutputString(text);
+						string line = proc.StandardOutput.ReadLine();
+
+						text.WriteLine(line);
+						outputWindowPane.OutputString(line);
 						outputWindowPane.OutputString("\r\n");
 					}
 					if (proc.ExitCode > 0) {
@@ -204,6 +232,8 @@
 						} else {
 							outputWindowPane.OutputString("\r\n\r\nMonoHelper: XRebuild Solution End");
 						}
+
+						MarkErrors(text.ToString());
 					} else {
 						if ((project.ConfigurationManager != null) && (project.ConfigurationManager.ActiveConfiguration != null)) {
 							Property property = GetProperty(project.ConfigurationManager.ActiveConfiguration.Properties, "DebugSymbols");
@@ -311,42 +341,45 @@
 		}
 
 		private static void GenerateDebugSymbols(string absoluteOutputPath, OutputWindowPane outputWindowPane) {
-			FileInfo[] files = (new DirectoryInfo(absoluteOutputPath)).GetFiles();
 
-			foreach (FileInfo file in files) {
-				if (file.Name.EndsWith(".dll") || file.Name.EndsWith(".exe")) {
-					if (files.Any(x => x.Name.EndsWith(".mdb") && x.Name.Substring(0, x.Name.Length - 4) == file.Name)) {
-						outputWindowPane.OutputString(string.Format("MonoTools: Assembly {0}\r\n", file.Name));
+			var files = new HashSet<string>(
+				new DirectoryInfo(absoluteOutputPath)
+				.GetFiles()
+				.Select(file => file.FullName));
 
-						string assemblyPath = file.FullName;
+			foreach (string file in files) {
+				if ((file.EndsWith(".dll") || file.EndsWith(".exe")) && files.Contains(file + ".mdb")) {
 
-						AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyPath,
-							new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider(), ReadSymbols = true });
+					outputWindowPane.OutputString(string.Format("MonoTools: Assembly {0}\r\n", Path.GetFileName(file)));
 
-						CustomAttribute debuggableAttribute =
-							new CustomAttribute(
-								assemblyDefinition.MainModule.Import(
-									typeof(DebuggableAttribute).GetConstructor(new[] { typeof(DebuggableAttribute.DebuggingModes) })));
+					string assemblyPath = file;
 
-						debuggableAttribute.ConstructorArguments.Add(
-							new CustomAttributeArgument(assemblyDefinition.MainModule.Import(typeof(DebuggableAttribute.DebuggingModes)),
-								DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
-									DebuggableAttribute.DebuggingModes.EnableEditAndContinue |
-									DebuggableAttribute.DebuggingModes.DisableOptimizations));
+					AssemblyDefinition assemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyPath,
+						new ReaderParameters { SymbolReaderProvider = new MdbReaderProvider(), ReadSymbols = true });
 
-						if (assemblyDefinition.CustomAttributes.Any(x => x.AttributeType.Name == typeof(DebuggableAttribute).Name)) {
-							// Replace existing attribute
-							int indexOf =
-								assemblyDefinition.CustomAttributes.IndexOf(
-									assemblyDefinition.CustomAttributes.Single(x => x.AttributeType.Name == typeof(DebuggableAttribute).Name));
-							assemblyDefinition.CustomAttributes[indexOf] = debuggableAttribute;
-						} else {
-							assemblyDefinition.CustomAttributes.Add(debuggableAttribute);
-						}
+					CustomAttribute debuggableAttribute =
+						new CustomAttribute(
+							assemblyDefinition.MainModule.Import(
+								typeof(DebuggableAttribute).GetConstructor(new[] { typeof(DebuggableAttribute.DebuggingModes) })));
 
-						assemblyDefinition.Write(assemblyPath,
-							new WriterParameters { SymbolWriterProvider = new PdbWriterProvider(), WriteSymbols = true });
+					debuggableAttribute.ConstructorArguments.Add(
+						new CustomAttributeArgument(assemblyDefinition.MainModule.Import(typeof(DebuggableAttribute.DebuggingModes)),
+							DebuggableAttribute.DebuggingModes.Default | DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
+								DebuggableAttribute.DebuggingModes.EnableEditAndContinue |
+								DebuggableAttribute.DebuggingModes.DisableOptimizations));
+
+					if (assemblyDefinition.CustomAttributes.Any(x => x.AttributeType.Name == typeof(DebuggableAttribute).Name)) {
+						// Replace existing attribute
+						int indexOf =
+							assemblyDefinition.CustomAttributes.IndexOf(
+								assemblyDefinition.CustomAttributes.Single(x => x.AttributeType.Name == typeof(DebuggableAttribute).Name));
+						assemblyDefinition.CustomAttributes[indexOf] = debuggableAttribute;
+					} else {
+						assemblyDefinition.CustomAttributes.Add(debuggableAttribute);
 					}
+
+					assemblyDefinition.Write(assemblyPath,
+						new WriterParameters { SymbolWriterProvider = new PdbWriterProvider(), WriteSymbols = true });
 				}
 			}
 		}
@@ -426,7 +459,7 @@
 			outputWindowPane.OutputString("MonoTools, Version 1.0\r\n");
 			outputWindowPane.OutputString("Copyright © Christopher Dresel,  Simon Egli, Giesswein-Apps 2016\r\n");
 			outputWindowPane.OutputString("\r\n");
-
+			
 			return outputWindowPane;
 		}
 

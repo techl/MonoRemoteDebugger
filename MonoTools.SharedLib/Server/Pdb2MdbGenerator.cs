@@ -12,12 +12,12 @@ namespace MonoTools.Debugger.Library {
 		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		internal void GeneratePdb2Mdb(string directoryName) {
-			logger.Trace(directoryName);
+			//logger.Trace(directoryName);
 			IEnumerable<string> files =
 				 Directory.GetFiles(directoryName, "*.dll")
 					  .Concat(Directory.GetFiles(directoryName, "*.exe"))
-					  .Where(x => !x.Contains("vshost"));
-			logger.Trace(files.Count());
+					  .Where(x => !x.Contains(".vshost.exe"));
+			//logger.Trace(files.Count());
 
 			var dirInfo = new DirectoryInfo(directoryName);
 

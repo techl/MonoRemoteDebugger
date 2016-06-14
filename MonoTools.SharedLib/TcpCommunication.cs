@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.IO.Compression;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MonoTools.Debugger.Library {
@@ -14,17 +16,20 @@ namespace MonoTools.Debugger.Library {
 		private readonly BinaryFormatter serializer;
 		private readonly Socket socket;
 		public NetworkStream Stream;
-		private string rootPath;
+		public string RootPath;
 		public bool Compressed = false;
 		public bool IsLocal = false;
 
 		public TcpCommunication(Socket socket, string rootPath = null, bool compressed = false, bool local = false) {
 			this.socket = socket;
 			serializer = new BinaryFormatter();
+			serializer.AssemblyFormat = FormatterAssemblyStyle.Simple;
+			serializer.TypeFormat = FormatterTypeStyle.TypesAlways;
+			serializer.Binder = new SimpleDeserializationBinder();
 			Stream = new NetworkStream(socket);
 			Compressed = compressed;
 			IsLocal = local;
-			this.rootPath = rootPath;
+			RootPath = rootPath;
 		}
 
 		public bool IsConnected {
@@ -42,7 +47,7 @@ namespace MonoTools.Debugger.Library {
 		public virtual Message Receive() {
 			var msg = (Message)serializer.Deserialize(Stream);
 			if (msg is IExtendedMessage) {
-				if (msg is IMessageWithFiles) ((IMessageWithFiles)msg).Files.RootPath = rootPath;
+				if (msg is IMessageWithFiles) ((IMessageWithFiles)msg).Files.RootPath = RootPath;
 				((IExtendedMessage)msg).Receive(this);
 			}
 			return msg;
@@ -64,4 +69,12 @@ namespace MonoTools.Debugger.Library {
 			}
 		}
 	}
+
+	sealed class SimpleDeserializationBinder : SerializationBinder {
+		public override Type BindToType(string assemblyName, string typeName) {
+			var assembly = Assembly.Load(assemblyName);
+			return assembly.GetType(typeName);
+		}
+	}
+
 }
