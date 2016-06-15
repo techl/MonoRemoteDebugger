@@ -121,10 +121,13 @@ namespace MonoTools.VSExtension {
 				if (isWeb) {
 					var ext = (WAProjectExtender)startup.Extender["WebApplication"];
 					var serverurl = ext.NonSecureUrl ?? ext.SecureUrl;
-					var uri = new Uri(serverurl);
-					host = uri.Host;
-					var local = Dns.GetHostAddresses(host).Any(a => a.IsIPv6LinkLocal || a == IPAddress.Parse("127.0.0.1"));
-					if (local) host = null;
+					if (serverurl.Contains("*")) host = "*";
+					else {
+						var uri = new Uri(serverurl);
+						host = uri.Host;
+						var local = Dns.GetHostAddresses(host).Any(a => a.IsIPv6LinkLocal || a == IPAddress.Parse("127.0.0.1"));
+						if (local) host = null;
+					}
 				} else {
 					var props = startup.ConfigurationManager.ActiveConfiguration.Properties;
 					try {
@@ -153,7 +156,8 @@ namespace MonoTools.VSExtension {
 						server.Start();
 						await AttachDebugger(Debugger.Library.MonoProcess.GetLocalIp().ToString(), true);
 					}
-				} else {
+				} else if (host == "*") StartSearching();
+				else {
 					await AttachDebugger(host, false);
 				}
 			} catch (Exception ex) {

@@ -16,10 +16,9 @@ namespace MonoTools
 		public const uint OpenLogFile = 0x108;
 		public const uint MoMASolution = 0x109;
 		public const uint MoMAProject = 0x10A;
-
 	};
 
 	static class Vsix {
-		public const string Version = "1.0";
+		public const string Version = "2.0";
 	}
 }

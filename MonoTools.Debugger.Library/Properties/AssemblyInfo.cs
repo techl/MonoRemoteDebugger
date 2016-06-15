@@ -1,4 +1,4 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("MonoTools.SharedLib")]
+[assembly: AssemblyTitle("MonoTools.Debugger.Library")]

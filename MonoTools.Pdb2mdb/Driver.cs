@@ -21,6 +21,7 @@ using Mono.CompilerServices.SymbolWriter;
 
 namespace Pdb2Mdb {
 
+	// TODO use Mono.Cecil instead of pdb2mdb code base.
 	public class Converter {
 
 		MonoSymbolWriter mdb;
