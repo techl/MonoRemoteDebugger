@@ -221,33 +221,16 @@ namespace MonoTools.VSExtension {
 			if (project == null) return;
 
 			var filename = project.FullName;
-			var bproj = new Microsoft.Build.BuildEngine.Project(new Microsoft.Build.BuildEngine.Engine());
-			bproj.Load(filename);
+			var bproj = new Microsoft.Build.Evaluation.Project(filename);
 
 			var imppath = Path.Combine(MSBuildExtensionsPath, targets);
 
-			Microsoft.Build.BuildEngine.Import sbimp = null;
-			foreach (Microsoft.Build.BuildEngine.Import imp in bproj.Imports) {
-				if (imp.ProjectPath.Contains(targets)) {
-					sbimp = imp;
-					if (sbimp.ProjectPath == imppath) return; // import is already there, so no need to modify project any further.
-					break;
-				}
-			}
+			if (bproj.Imports.Any(imp => imp.ImportedProject.FullPath == imppath)) return;
 
+			bproj.Xml.AddImport(imppath);
 			dte.ExecuteCommand("Project.UnloadProject", string.Empty);
-
-			if (sbimp != null) {
-				if (sbimp.ProjectPath != imppath) {
-					bproj.Imports.RemoveImport(sbimp);
-					sbimp = null;
-				}
-			}
-			if (sbimp == null) bproj.Imports.AddNewImport(imppath, null);
-			bproj.Save(filename);
-
+			bproj.Save();
 			dte.ExecuteCommand("Project.ReloadProject", string.Empty);
-
 		}
 
 		private void GeneratePdbs(string absoluteOutputPath, OutputWindowPane outputWindowPane) {
