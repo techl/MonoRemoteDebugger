@@ -293,7 +293,7 @@
       <Project>{134655a3-ef22-4e4a-ae8d-9ee1282733a7}</Project>
       <Name>MonoTools.Debugger.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MonoTools.SharedLib\MonoTools.Debugger.Library.csproj">
+    <ProjectReference Include="..\MonoTools.Debugger.Library\MonoTools.Debugger.Library.csproj">
       <Project>{fe76aee5-c4e3-45ed-aa18-29df82ab405c}</Project>
       <Name>MonoTools.Debugger.Library</Name>
     </ProjectReference>

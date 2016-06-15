@@ -93,7 +93,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoTools.SharedLib\MonoTools.Debugger.Library.csproj">
+    <ProjectReference Include="..\MonoTools.Debugger.Library\MonoTools.Debugger.Library.csproj">
       <Project>{fe76aee5-c4e3-45ed-aa18-29df82ab405c}</Project>
       <Name>MonoTools.Debugger.Library</Name>
     </ProjectReference>
