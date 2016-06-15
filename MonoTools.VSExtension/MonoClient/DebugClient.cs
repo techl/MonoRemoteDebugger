@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using MonoTools.Debugger.Library;
 
-namespace MonoTools.Debugger.VSExtension.MonoClient {
+namespace MonoTools.VSExtension.MonoClient {
 
 	public class DebugClient {
 		private readonly ApplicationTypes type;

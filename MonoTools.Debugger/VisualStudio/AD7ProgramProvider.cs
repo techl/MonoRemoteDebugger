@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     [ComVisible(true)]
     [Guid(AD7Guids.ProgramProviderString)]

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
 using MonoTools.Debugger.Contracts;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 using NLog;
-using MonoTools.Debugger.Debugger;
+using MonoTools.Debugger;
 using System.Globalization;
 using MICore;
-using MonoTools.Debugger.Debugger.DebugEngineHost;
+using MonoTools.Debugger.DebugEngineHost;
 using System.Diagnostics;
 using Techl;
 

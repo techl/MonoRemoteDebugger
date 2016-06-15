@@ -7,7 +7,7 @@ using System.Text;
 using Microsoft.VisualStudio.Debugger.Interop;
 using MICore;
 using System.Diagnostics;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 
 // This file contains the various event objects that are sent to the debugger from the sample engine via IDebugEventCallback2::Event.
 // These are used in EngineCallback.cs.

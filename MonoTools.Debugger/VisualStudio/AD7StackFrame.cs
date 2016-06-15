@@ -7,7 +7,7 @@ using Mono.Debugger.Soft;
 using Microsoft.MIDebugEngine;
 using System.Diagnostics;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class AD7StackFrame : IDebugStackFrame2, IDebugExpressionContext2
     {

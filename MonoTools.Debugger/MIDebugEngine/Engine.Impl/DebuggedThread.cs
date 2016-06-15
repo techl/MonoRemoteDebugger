@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MICore;
 using System.Diagnostics;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 using Mono.Debugger.Soft;
 
 namespace Microsoft.MIDebugEngine

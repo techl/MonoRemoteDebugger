@@ -1,4 +1,4 @@
-﻿namespace MonoTools.Debugger.VSExtension.Settings
+﻿namespace MonoTools.VSExtension.Settings
 {
     public class UserSettings
     {

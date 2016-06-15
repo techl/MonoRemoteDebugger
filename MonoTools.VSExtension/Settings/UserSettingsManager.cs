@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Settings;
 using Newtonsoft.Json;
 using NLog;
 
-namespace MonoTools.Debugger.VSExtension.Settings
+namespace MonoTools.VSExtension.Settings
 {
     public class UserSettingsManager
     {

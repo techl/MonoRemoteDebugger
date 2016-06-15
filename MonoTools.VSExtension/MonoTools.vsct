@@ -57,6 +57,9 @@
 			<Group guid="GuidMonoToolsCmdSet" id="BuildGroup" priority="0x0600">
 				<Parent guid="GuidMonoToolsCmdSet" id="TopLevelMenu"/>
 			</Group>
+			<Group guid="GuidMonoToolsCmdSet" id="BuildProjectGroup" priority="0x0600">
+				<Parent guid="GuidMonoToolsCmdSet" id="TopLevelMenu"/>
+			</Group>
 			<Group guid="GuidMonoToolsCmdSet" id="DebugGroup" priority="0x0600">
 				<Parent guid="GuidMonoToolsCmdSet" id="TopLevelMenu"/>
 			</Group>
@@ -98,7 +101,7 @@
 			</Button>
 
 			<Button guid="GuidMonoToolsCmdSet" id="XBuildProjectID" priority="0x0100" type="Button">
-				<Parent guid="GuidMonoToolsCmdSet" id="BuildGroup" />
+				<Parent guid="GuidMonoToolsCmdSet" id="BuildProjectGroup" />
 				<Icon guid="BuildProjectIcon" id="Icon" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
@@ -110,7 +113,7 @@
 			</Button>
 
 			<Button guid="GuidMonoToolsCmdSet" id="XRebuildProjectID" priority="0x0100" type="Button">
-				<Parent guid="GuidMonoToolsCmdSet" id="BuildGroup" />
+				<Parent guid="GuidMonoToolsCmdSet" id="BuildProjectGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
@@ -121,7 +124,7 @@
 			</Button>
 
 			<Button guid="GuidMonoToolsCmdSet" id="AddPdb2MdbToProjectID" priority="0x0100" type="Button">
-				<Parent guid="GuidMonoToolsCmdSet" id="BuildGroup" />
+				<Parent guid="GuidMonoToolsCmdSet" id="BuildProjectGroup" />
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
@@ -203,6 +206,12 @@
 
 	</Commands>
 
+	<KeyBindings>
+		<KeyBinding guid="GuidMonoToolsCmdSet" id="TopLevelMenu" editor="guidVSStd97" key1="m" mod1="SHIFT" />
+		<KeyBinding guid="GuidMonoToolsCmdSet" id="XBuildID" editor="guidVSStd97" key1="b" mod1="Control" mod2="Alt" />
+		<KeyBinding guid="GuidMonoToolsCmdSet" id="DebugMonoID" editor="guidVSStd97" key1="VK_F5" mod1="Alt" />
+	</KeyBindings>
+	
 	<Symbols>
 		<!-- This is the package guid. -->
 		<GuidSymbol name="GuidMonoToolsPkg" value="{fbcafcd5-87dc-44f0-83c0-0a5be15709d8}" />
@@ -210,10 +219,11 @@
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="GuidMonoToolsCmdSet" value="{66ae7e29-9859-4e84-b953-1502a786e958}">
 
-			<IDSymbol name="BuildGroup" value="0x1020" />
-			<IDSymbol name="DebugGroup" value="0x1022" />
-			<IDSymbol name="MoMAGroup" value="0x1023" />
-			<IDSymbol name="TopLevelMenu" value="0x1021"/>
+			<IDSymbol name="TopLevelMenu" value="0x1020"/>
+			<IDSymbol name="BuildGroup" value="0x1021" />
+			<IDSymbol name="BuildProjectGroup" value="0x1022" />
+			<IDSymbol name="DebugGroup" value="0x1023" />
+			<IDSymbol name="MoMAGroup" value="0x1024" />
 
 			<IDSymbol name="XBuildID" value="0x0100" />
 			<IDSymbol name="XRebuildID" value="0x0101" />

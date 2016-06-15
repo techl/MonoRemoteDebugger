@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class AsyncDispatcher
     {

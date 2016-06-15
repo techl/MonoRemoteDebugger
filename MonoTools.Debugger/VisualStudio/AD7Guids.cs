@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     public static class AD7Guids
     {

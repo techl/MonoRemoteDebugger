@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Win32;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 
 namespace MonoTools.VSExtension
 {

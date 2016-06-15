@@ -1,4 +1,4 @@
-﻿namespace MonoTools.Debugger.Debugger
+﻿namespace MonoTools.Debugger
 {
     internal class DebuggedMonoThread
     {

@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class MonoDocument : IDebugDocument2
     {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using MonoTools.Debugger.Library;
 
-namespace MonoTools.Debugger.VSExtension.MonoClient {
+namespace MonoTools.VSExtension.MonoClient {
 
 	public class MonoServerDiscovery {
 

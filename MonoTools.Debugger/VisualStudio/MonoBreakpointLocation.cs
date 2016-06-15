@@ -1,6 +1,6 @@
 ﻿using Mono.Debugger.Soft;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class MonoBreakpointLocation
     {

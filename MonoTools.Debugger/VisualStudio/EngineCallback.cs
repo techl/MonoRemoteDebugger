@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.Debugger.Interop;
 using Microsoft.MIDebugEngine;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     public class EngineCallback //: MICore.IDeviceAppLauncherEventCallback
     {

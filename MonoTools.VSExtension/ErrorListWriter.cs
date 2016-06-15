@@ -2,11 +2,10 @@
 using System.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using EnvDTE;
 
 namespace MonoTools.VSExtension {
 
-	public static class ErrorList {
+	public static class ErrorsWindow {
 
 		private static ErrorListProvider provider;
 		private static IVsSolution solutions;

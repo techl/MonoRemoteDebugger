@@ -1,4 +1,0 @@
-﻿namespace MonoTools.Debugger.Library {
-
-
-}

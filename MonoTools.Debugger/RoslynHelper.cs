@@ -6,14 +6,14 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Mono.Debugger.Soft;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 using NLog;
 using Location = Microsoft.CodeAnalysis.Location;
 using System.IO;
 using Microsoft.MIDebugEngine;
 using Microsoft.VisualStudio.Debugger.Interop;
 
-namespace MonoTools.Debugger.Debugger
+namespace MonoTools.Debugger
 {
     internal class RoslynHelper
     {

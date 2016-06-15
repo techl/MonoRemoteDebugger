@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MonoTools.Debugger.Debugger.DebugEngineHost
+namespace MonoTools.Debugger.DebugEngineHost
 {
     public static class HostOutputWindowEx
     {

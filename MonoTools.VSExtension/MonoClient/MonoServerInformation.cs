@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace MonoTools.Debugger.VSExtension.MonoClient
+namespace MonoTools.VSExtension.MonoClient
 {
     public class MonoServerInformation
     {

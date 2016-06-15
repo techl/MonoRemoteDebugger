@@ -102,6 +102,10 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.12.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
+    <Reference Include="Microsoft.VisualStudio.Web.Application">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\Microsoft.VisualStudio.Web.Application.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
       <Private>True</Private>
@@ -138,6 +142,10 @@
     <Reference Include="System.Design" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="VsWebSite.Interop">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -167,10 +175,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Guids.cs" />
-    <Compile Include="Services.cs" />
-    <Compile Include="MonoToolsOptionsDialogPage.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Services\PropertiesExtension.cs" />
+    <Compile Include="Services\Services.cs" />
+    <Compile Include="Services\Services.Build.cs" />
+    <Compile Include="Services\Services.MoMA.cs" />
+    <Compile Include="MonoToolsOptionsDialogPage.cs" />
     <Compile Include="MonoToolsInstaller.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="Settings\UserSettings.cs" />
@@ -182,21 +191,28 @@
     <Compile Include="source.extension.cs">
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
-    <Compile Include="ErrorList.cs" />
+    <Compile Include="ErrorListWriter.cs" />
     <Compile Include="VSPackage.cs" />
-    <Compile Include="MonoVisualStudioExtension.cs" />
+    <Compile Include="Services\Services.Debugger.cs" />
     <Compile Include="Views\ServersFound.xaml.cs">
       <DependentUpon>ServersFound.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ServersFoundViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <Content Include="Pdb2Mdb.targets">
+    <Resource Include="Views\MonoToolsLogo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+    </Resource>
+    <Content Include="Resources\Screenshot.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="..\MonoTools.Pdb2Mdb\Pdb2Mdb.targets">
+      <Link>Pdb2Mdb.targets</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <None Include="app.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
       <Generator>VsixManifestGenerator</Generator>
@@ -216,9 +232,12 @@
     <Resource Include="Resources\buildproject.png" />
     <Resource Include="Resources\buildsolution.png" />
     <Content Include="Resources\MonoToolsLogo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="Resources\MonoToolsLogo.png">
+      <Link>MonoToolsLogo.png</Link>
+    </Resource>
     <Content Include="..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -279,6 +298,7 @@
       <Name>MonoTools.Debugger.Library</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
   </PropertyGroup>

@@ -14,7 +14,7 @@ using System.IO;
 using NLog;
 using Microsoft.MIDebugEngine;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class AD7PendingBreakpoint : IDebugPendingBreakpoint2
     {

@@ -1,4 +1,4 @@
-﻿namespace MonoTools.Debugger.Debugger.Enums
+﻿namespace MonoTools.Debugger.Enums
 {
     internal enum SteppingTypeEnum
     {

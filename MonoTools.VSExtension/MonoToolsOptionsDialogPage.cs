@@ -7,6 +7,7 @@
 
 	[ClassInterface(ClassInterfaceType.AutoDual)]
 	[CLSCompliant(false), ComVisible(true)]
+	[System.ComponentModel.DesignerCategory("")]
 	public class MonoToolsOptionsDialogPage : DialogPage
 	{
 		[Category("Mono Runtime Settings")]

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MonoTools.Debugger.Contracts;
 using MonoTools.Debugger.Library;
 
-namespace MonoTools.Debugger.VSExtension.MonoClient {
+namespace MonoTools.VSExtension.MonoClient {
 
 	public class DebugSession : IDebugSession {
 

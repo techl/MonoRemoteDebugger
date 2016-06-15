@@ -2,13 +2,13 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using MonoTools.Debugger.VSExtension.MonoClient;
-using MonoTools.Debugger.VSExtension.Settings;
+using MonoTools.VSExtension.MonoClient;
+using MonoTools.VSExtension.Settings;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Windows;
 
-namespace MonoTools.Debugger.VSExtension.Views
+namespace MonoTools.VSExtension.Views
 {
     public class ServersFoundViewModel : IDisposable
     {

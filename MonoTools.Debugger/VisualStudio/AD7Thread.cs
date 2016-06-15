@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
-using MonoTools.Debugger.Debugger.VisualStudio;
+using MonoTools.Debugger.VisualStudio;
 
 namespace Microsoft.MIDebugEngine
 {

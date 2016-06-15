@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using NLog;
 
-namespace MonoTools.Debugger.Debugger
+namespace MonoTools.Debugger
 {
     public static class DebugHelper
     {

@@ -1,6 +1,6 @@
 ﻿using Mono.Debugger.Soft;
 
-namespace MonoTools.Debugger.Debugger
+namespace MonoTools.Debugger
 {
     public class TypeSummary
     {

@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Debugger.Interop;
 using Microsoft.MIDebugEngine;
 using MICore;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class AD7DocumentContext : IDebugDocumentContext2, IDebugCodeContext2
     {

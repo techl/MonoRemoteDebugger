@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
 using Microsoft.MIDebugEngine;
 
-namespace MonoTools.Debugger.Debugger.VisualStudio
+namespace MonoTools.Debugger.VisualStudio
 {
     internal class ExpandedProperty
     {

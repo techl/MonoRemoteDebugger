@@ -88,6 +88,10 @@
     <None Include="Makefile" />
     <None Include="packages.config" />
     <None Include="pdb2mdb.exe.sources" />
+    <Content Include="Pdb2Mdb.targets">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitattributes" />

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MonoTools.Debugger.VSExtension.Views
+namespace MonoTools.VSExtension.Views
 {
     /// <summary>
     ///     Interaktionslogik für ServersFound.xaml
