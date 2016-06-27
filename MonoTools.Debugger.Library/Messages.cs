@@ -96,15 +96,18 @@ namespace MonoTools.Debugger.Library {
 			con = connection;
 			mode = StreamModes.Write;
 			stream = connection.Stream;
-			var w = new BinaryWriter(stream);
+			var w = connection.writer;
+			w.Write(connection.Compressed);
 			foreach (var file in EnumerateFiles()) {
 				if (!string.IsNullOrEmpty(file.Name)) {
 					w.Write(file.Name);
-					w.Write((Int64)file.Content.Length);
+					var comp = NeedsCompression(connection, file.Name);
+					w.Write(comp);
 					Stream writer;
-					if (NeedsCompression(connection, file.Name)) writer = new DeflateStream(stream, CompressionLevel.Fastest, true);
+					if (comp) writer = new DeflateStream(stream, CompressionLevel.Fastest, true);
 					else writer = stream;
-					file.Content.CopyTo(writer);
+					w.Write((Int64)file.Content.Length);
+					file.Content.CopyTo(writer); System.Diagnostics.Debugger.Log(1, "", ".");
 				}
 			}
 			w.Write("");
@@ -113,14 +116,16 @@ namespace MonoTools.Debugger.Library {
 		public void Receive(TcpCommunication connection) {
 			con = connection;
 			stream = connection.Stream;
+			if (Directory.Exists(RootPath)) Directory.Delete(RootPath, true);
 			foreach (var file in EnumerateFiles()) { // save files contents
 				var path = Path.Combine(RootPath, file.Name);
 				var dir = Path.GetDirectoryName(path);
 				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 				using (var w = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) {
-					file.Content.CopyTo(w);
+					file.Content.CopyTo(w); Console.Write(".");
 				}
 			}
+			Console.WriteLine();
 		}
 
 		IEnumerable<StreamedFile> EnumerateFiles() {
@@ -131,18 +136,19 @@ namespace MonoTools.Debugger.Library {
 					yield return new StreamedFile { Name = file, Content = new FileStream(absFile, FileMode.Open, FileAccess.Read, FileShare.Read) };
 				}
 			} else { // read
-				var r = new BinaryReader(stream);
+				var r = con.reader;
 				var name = r.ReadString();
+				var comp = r.ReadBoolean();
 				while (name != "") {
 					HasMdbs |= name.EndsWith(".dll.mdb") || name.EndsWith(".exe.mdb");
-					var len = r.ReadInt64();
 					Stream reader;
-					if (NeedsCompression(con, name)) {
+					var len = r.ReadInt64();
+					if (comp) {
 						reader = new DeflateStream(stream, CompressionMode.Decompress, true);
 					} else {
 						reader = stream;
 					}
-					yield return new StreamedFile { Name = name, Content = new StreamWrapper(reader, len) };
+					yield return new StreamedFile { Name = name, Content = new SubStream(reader, len) };
 					name = r.ReadString();
 				}
 			}

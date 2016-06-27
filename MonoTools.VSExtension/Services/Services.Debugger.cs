@@ -13,6 +13,7 @@ using MonoTools.VSExtension.MonoClient;
 using MonoTools.VSExtension.Views;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using NLog;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Task = System.Threading.Tasks.Task;
@@ -23,6 +24,15 @@ using Microsoft.VisualStudio.Web.Application;
 namespace MonoTools.VSExtension {
 
 	public partial class Services {
+
+		[System.Diagnostics.Conditional("DEBUG")]
+		void Dump(Properties props) {
+			foreach (Property p in props) {
+				try {
+					System.Diagnostics.Debugger.Log(1, "", $"Property: {p.Name}={p.Value.ToString()}\r\n");
+				} catch { }
+			}
+		}
 
 		public async void Start() {
 			try {
@@ -37,7 +47,9 @@ namespace MonoTools.VSExtension {
 				string workingDirectory = null;
 				string arguments = null;
 				Project startup = GetStartupProject();
-				var props = startup.Properties;
+				var props = startup.ConfigurationManager.ActiveConfiguration.Properties;
+
+				Dump(props);
 
 				bool isWeb = ((object[])startup.ExtenderNames).Any(x => x.ToString() == "WebApplication") || startup.Object is VsWebSite.VSWebSite;
 
@@ -109,7 +121,9 @@ namespace MonoTools.VSExtension {
 					if (action == "2") System.Diagnostics.Process.Start(url);
 				}
 			} catch (Exception ex) {
-
+				logger.Error(ex);
+				if (server != null) server.Stop();
+				MessageBox.Show(ex.Message, "MonoTools.Debugger", MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 		}
 
@@ -137,7 +151,11 @@ namespace MonoTools.VSExtension {
 					} catch { }
 				}
 				StartDebug(host);
-			} catch (Exception ex) { }
+			} catch (Exception ex) {
+				logger.Error(ex);
+				if (server != null) server.Stop();
+				MessageBox.Show(ex.Message, "MonoTools.Debugger", MessageBoxButton.OK, MessageBoxImage.Error);
+			}
 		}
 
 		MonoDebugServer server = null;
@@ -196,9 +214,10 @@ namespace MonoTools.VSExtension {
 			string workingDirectory = null;
 			string arguments = null;
 			Project startup = GetStartupProject();
-			var props = startup.Properties;
+			var props = startup.ConfigurationManager.ActiveConfiguration.Properties;
+			//Dump(props);
 
-			bool isWeb = ((object[])startup.ExtenderNames).Any(x => x.ToString() == "WebApplication");
+			bool isWeb = ((object[])startup.ExtenderNames).Any(x => x.ToString() == "WebApplication") || startup.Object is VsWebSite.VSWebSite;
 
 			var isNet4 = true;
 			var frameworkprop = props.Get("TargetFrameworkMoniker")
@@ -263,6 +282,12 @@ namespace MonoTools.VSExtension {
 
 		public async void StartDebugger(ApplicationTypes appType, string targetExe, string outputDir, bool local, Frameworks framework, string arguments, string url, string workingDir, string ip, string ports) {
 
+			IPAddress ipadr;
+			if (!IPAddress.TryParse(ip, out ipadr)) {
+				IPAddress[] adresses = Dns.GetHostEntry(ip).AddressList;
+				ip = adresses.FirstOrDefault(adr => adr.AddressFamily == AddressFamily.InterNetwork)?.ToString();
+				if (ip == null) throw new ArgumentException("Remote server not found.");
+			}
 			var client = new DebugClient(appType, targetExe, Path.GetFullPath(outputDir), local, framework) {
 				Arguments = arguments,
 				Url = url,

@@ -10,9 +10,13 @@ namespace MonoTools.VSExtension {
 
 		public static string Get(this Properties props, string name) {
 			try {
-				return props.Item("name")?.Value.ToString();
+				return props.Item(name)?.Value.ToString();
 			} catch { }
 			return null; 
+		}
+
+		public static string GetProperty(this Project proj, string name) {
+			return proj.Properties.Get(name);
 		}
 	}
 }

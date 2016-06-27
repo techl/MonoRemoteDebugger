@@ -59,7 +59,7 @@ namespace MonoTools.Debugger.Library {
 
 		private void StartListening(CancellationToken token) {
 			while (true) {
-				logger.Info("Waiting for client");
+				logger.Info("Waiting for client...");
 				if (tcp == null) {
 					token.ThrowIfCancellationRequested();
 					return;

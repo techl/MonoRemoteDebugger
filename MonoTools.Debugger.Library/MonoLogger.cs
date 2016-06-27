@@ -28,7 +28,7 @@ namespace MonoTools.Debugger.Library
             config.AddTarget("file", fileTarget);
             config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, fileTarget));
             var console = new ColoredConsoleTarget();
-				console.Layout = new NLog.Layouts.SimpleLayout("MonoDebugger: ${message}");
+				console.Layout = new NLog.Layouts.SimpleLayout("${message}");
             config.AddTarget("file", console);
             config.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, console));
 

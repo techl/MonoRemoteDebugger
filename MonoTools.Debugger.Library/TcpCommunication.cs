@@ -14,38 +14,58 @@ namespace MonoTools.Debugger.Library {
 
 	public class TcpCommunication {
 		private readonly BinaryFormatter serializer;
-		private readonly Socket socket;
+		public readonly Socket socket;
 		public NetworkStream Stream;
 		public string RootPath;
 		public bool Compressed = false;
 		public bool IsLocal = false;
+		public static PipeQueue<Message> queue = new PipeQueue<Message>();
+		public BinaryWriter writer;
+		public BinaryReader reader;
 
-		public TcpCommunication(Socket socket, string rootPath = null, bool compressed = false, bool local = false) {
+		public TcpCommunication(Socket socket, string rootPath, bool compressed, bool local) {
 			this.socket = socket;
+			if (!OS.IsMono) {
+				socket.ReceiveTimeout = -1;
+				socket.SendTimeout = -1;
+			}
 			serializer = new BinaryFormatter();
 			serializer.AssemblyFormat = FormatterAssemblyStyle.Simple;
 			serializer.TypeFormat = FormatterTypeStyle.TypesAlways;
 			serializer.Binder = new SimpleDeserializationBinder();
-			Stream = new NetworkStream(socket);
 			Compressed = compressed;
 			IsLocal = local;
 			RootPath = rootPath;
+			Stream = new NetworkStream(socket, FileAccess.ReadWrite, false);
+			writer = new BinaryWriter(Stream);
+			reader = new BinaryReader(Stream);
 		}
 
 		public bool IsConnected {
-			get { return socket.IsSocketConnected(); }
+			get { return IsLocal || socket.IsSocketConnected(); }
 		}
 
 		public virtual void Send(Message msg) {
-			serializer.Serialize(Stream, msg);
-			if (msg is IExtendedMessage) {
-				((IExtendedMessage)msg).Send(this);
+			if (IsLocal) queue.Enqueue(msg);
+			else {
+				var m = new MemoryStream();
+				serializer.Serialize(m, msg);
+				writer.Write((Int32)m.Length);
+				writer.Write(m.ToArray());
+				if (msg is IExtendedMessage) {
+					((IExtendedMessage)msg).Send(this);
+				}
 			}
 		}
 
 
 		public virtual Message Receive() {
-			var msg = (Message)serializer.Deserialize(Stream);
+			if (IsLocal) return queue.Dequeue();
+			var len = reader.ReadInt32();
+			var buf = new byte[len];
+			reader.Read(buf, 0, len);
+			var m = new MemoryStream(buf); 
+			var msg = (Message)serializer.Deserialize(m);
 			if (msg is IExtendedMessage) {
 				if (msg is IMessageWithFiles) ((IMessageWithFiles)msg).Files.RootPath = RootPath;
 				((IExtendedMessage)msg).Receive(this);
@@ -60,6 +80,9 @@ namespace MonoTools.Debugger.Library {
 
 		public async Task<Message> ReceiveAsync() {
 			return await Task.Run(() => Receive());
+		}
+		public async Task<T> ReceiveAsync<T>() where T : Message, new() {
+			return await Task.Run(() => Receive<T>());
 		}
 
 		public void Disconnect() {

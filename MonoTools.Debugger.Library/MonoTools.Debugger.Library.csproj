@@ -78,8 +78,11 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Async.cs" />
+    <Compile Include="ConcurrentQueue.cs" />
+    <Compile Include="OS.cs" />
+    <Compile Include="PipeQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StreamWrapper.cs" />
+    <Compile Include="SubStream.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="MonoLogger.cs" />
     <Compile Include="Messages.cs" />

@@ -8,6 +8,8 @@ namespace MonoTools.Debugger.Server {
 
 		private static void Main(string[] args) {
 
+			Console.WriteLine("MonoDebugger v2.0, © johnshope.com. Pass ? for help.");
+
 			if (args.Any(a => a.Contains("help") || a.Contains("?"))) {
 				Console.WriteLine(@"usage: mono MonoDebugger.exe [-ports=message-port;debugger-port]
 

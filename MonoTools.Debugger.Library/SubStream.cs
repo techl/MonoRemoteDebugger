@@ -9,9 +9,9 @@ namespace MonoTools.Debugger.Library {
 
 	public enum StreamModes { Read, Write };
 
-	public class StreamWrapper : Stream {
+	public class SubStream : Stream {
 
-		public StreamWrapper(Stream baseStream, long length) : base() {
+		public SubStream(Stream baseStream, long length) : base() {
 			BaseStream = baseStream;
 			this.length = length;
 		}
@@ -32,14 +32,14 @@ namespace MonoTools.Debugger.Library {
 		}
 		public override void Close() {
 			Flush();
-			BaseStream.Close();
+			//BaseStream.Close();
 			Dispose(false);
 		}
 
 		// asnyc methods
 		public class ReadAsyncResult : AsyncResult<int> {
 
-			public ReadAsyncResult(StreamWrapper stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state) : base(callback, state) {
+			public ReadAsyncResult(SubStream stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state) : base(callback, state) {
 				if (stream.position+count >= stream.length) count = (int)(stream.length - stream.position);
 				if (count <= 0) SetAsCompleted(null, true);
 				else {

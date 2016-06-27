@@ -8,6 +8,7 @@ using System.Xml;
 using NLog;
 
 namespace MonoTools.Debugger.Library {
+
 	internal class ClientSession {
 		private readonly TcpCommunication communication;
 		private readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -23,7 +24,7 @@ namespace MonoTools.Debugger.Library {
 			IsLocal = local;
 			DebuggerPort = debuggerPort;
 			remoteEndpoint = ((IPEndPoint)socket.RemoteEndPoint).Address;
-			communication = new TcpCommunication(socket, rootPath, local);
+			communication = new TcpCommunication(socket, rootPath, true, local);
 		}
 
 		public void HandleSession() {
@@ -34,8 +35,10 @@ namespace MonoTools.Debugger.Library {
 					if (process != null && process.HasExited)
 						return;
 
-					logger.Trace("Receiving content from {0}", remoteEndpoint);
-					var msg = communication.Receive() as CommandMessage;
+					while (communication.socket.Available > 4) System.Threading.Thread.Sleep(0);
+
+					logger.Trace("Receiving content");
+					var msg = communication.Receive<CommandMessage>();
 
 					switch (msg.Command) {
 					case Commands.DebugContent:
@@ -63,7 +66,7 @@ namespace MonoTools.Debugger.Library {
 
 			if (!Directory.Exists(msg.RootPath)) Directory.CreateDirectory(msg.RootPath);
 
-			logger.Trace("Extracted content from {0} to {1}", remoteEndpoint, msg.RootPath);
+			logger.Trace("Extracted content to {1}", remoteEndpoint, msg.RootPath);
 
 			if (!msg.HasMdbs) {
 				var generator = new Pdb2MdbGenerator();
@@ -77,9 +80,10 @@ namespace MonoTools.Debugger.Library {
 		private void StartMono(ApplicationTypes type, Frameworks framework, string arguments, string workingDirectory, string url) {
 			MonoProcess proc = MonoProcess.Start(type, targetExe, framework, arguments, url);
 			proc.DebuggerPort = DebuggerPort;
-			workingDirectory = workingDirectory ?? rootPath;
+			workingDirectory = string.IsNullOrEmpty(workingDirectory) ? rootPath : workingDirectory;
 			proc.ProcessStarted += MonoProcessStarted;
 			process = proc.Start(workingDirectory);
+			logger.Info($"{proc.GetType().Name} started: \"{proc.process.StartInfo.FileName}\" {proc.process.StartInfo.Arguments}");
 			process.EnableRaisingEvents = true;
 			process.Exited += MonoExited;
 			process.ErrorDataReceived += SendOutput;
@@ -97,7 +101,7 @@ namespace MonoTools.Debugger.Library {
 		}
 
 		private void MonoExited(object sender, EventArgs e) {
-			Console.WriteLine("Program closed: " + process.ExitCode);
+			logger.Info("Program closed: " + process.ExitCode);
 			try {
 				Directory.Delete(rootPath, true);
 			} catch (Exception ex) {

@@ -8,7 +8,7 @@ using System.Net.Sockets;
 namespace MonoTools.Debugger.Library {
 	public abstract class MonoProcess {
 		public int DebuggerPort = 11000;
-		protected Process process;
+		public Process process;
 		public event EventHandler ProcessStarted;
 		internal abstract Process Start(string workingDirectory);
 
@@ -28,12 +28,13 @@ namespace MonoTools.Debugger.Library {
 		}
 
 		protected ProcessStartInfo GetProcessStartInfo(string workingDirectory, string monoBin) {
-			var dirInfo = new DirectoryInfo(workingDirectory);
 			var procInfo = new ProcessStartInfo(monoBin) {
-				WorkingDirectory = dirInfo.FullName,
+				WorkingDirectory = Path.GetFullPath(workingDirectory),
 				RedirectStandardError = true,
 				RedirectStandardOutput = true,
-				UseShellExecute = false
+				UseShellExecute = false,
+				CreateNoWindow = false,
+				WindowStyle = ProcessWindowStyle.Normal
 			};
 			return procInfo;
 		}
