@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<MSBuildPdb2MdbTasksLib>$(MSBuildThisFileDirectory)MonoTools.Pdb2Mdb.dll</MSBuildPdb2MdbTasksLib>
+		<AfterBuildDependsOn>$(AfterBuildDependsOn);ConvertPdb2Mdb</AfterBuildDependsOn>
+	</PropertyGroup>
+
+	<UsingTask AssemblyFile="$(MSBuildPdb2MdbTasksLib)" TaskName="MonoTools.Tasks.Pdb2Mdb" />
+
+	<Target Name="ConvertPdb2Mdb">
+		<ItemGroup>
+			<TargetDlls Include="$(TargetDir)\**\*.dll" />
+			<TargetDlls Include="$(TargetDir)\**\*.exe" />
+		</ItemGroup>
+
+		<Pdb2Mdb Files="@(TargetDlls)" />
+	</Target>
+
+</Project>
