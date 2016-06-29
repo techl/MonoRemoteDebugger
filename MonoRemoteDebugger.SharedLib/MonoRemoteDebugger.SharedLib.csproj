@@ -79,6 +79,9 @@
     <Compile Include="..\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\MonoRemoteDebugger.VSExtension\source.extension.cs">
+      <Link>source.extension.cs</Link>
+    </Compile>
     <Compile Include="ApplicationType.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="ExtensionMethods.cs" />
@@ -98,6 +101,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\MonoRemoteDebugger.VSExtension\source.extension.resx">
+      <Link>source.extension.resx</Link>
+      <DependentUpon>source.extension.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

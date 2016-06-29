@@ -133,6 +133,9 @@
     <Compile Include="..\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\MonoRemoteDebugger.VSExtension\source.extension.cs">
+      <Link>source.extension.cs</Link>
+    </Compile>
     <Compile Include="Contracts\IDebugSession.cs" />
     <Compile Include="DebugEngineHost\HostOutputWindowEx.cs" />
     <Compile Include="MIDebugEngine\Engine.Impl\DebuggedThread.cs" />
@@ -175,6 +178,12 @@
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\MonoRemoteDebugger.VSExtension\source.extension.resx">
+      <Link>source.extension.resx</Link>
+      <DependentUpon>source.extension.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

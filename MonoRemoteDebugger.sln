@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7AA95CC-1EAA-4E4B-81BE-CF921C5F219F}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,8 +29,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", 
 	ProjectSection(SolutionItems) = preProject
 		Assemblies\Microsoft.DebugEngineHost.dll = Assemblies\Microsoft.DebugEngineHost.dll
 		Assemblies\Microsoft.MICore.dll = Assemblies\Microsoft.MICore.dll
-		Assemblies\Mono.Debugger.Soft_4.0.4.4.dll = Assemblies\Mono.Debugger.Soft_4.0.4.4.dll
 		Assemblies\Techl.dll = Assemblies\Techl.dll
+		Assemblies\Techl.Mono.Cecil.dll = Assemblies\Techl.Mono.Cecil.dll
+		Assemblies\Techl.Mono.Debugger.Soft.dll = Assemblies\Techl.Mono.Debugger.Soft.dll
 	EndProjectSection
 EndProject
 Global
