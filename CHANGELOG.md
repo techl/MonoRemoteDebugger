@@ -12,6 +12,13 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.0.10
+**2016-06-29**
+
+- [x] Fixed the bug running without Xamarin extension.
+- [x] Cleared potential mono dll conflicts.
+- [x] Support VS15
+
 ## 1.0.9
 **2016-06-07**
 
