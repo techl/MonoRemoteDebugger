@@ -88,9 +88,6 @@
     <Reference Include="Microsoft.VisualStudio.Debugger.InteropA, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.14.0, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Mono.Debugger.Soft_4.0.4.4">
-      <HintPath>..\Assemblies\Mono.Debugger.Soft_4.0.4.4.dll</HintPath>
-    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.2.1\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
@@ -127,6 +124,9 @@
     </Reference>
     <Reference Include="Techl">
       <HintPath>..\Assemblies\Techl.dll</HintPath>
+    </Reference>
+    <Reference Include="Techl.Mono.Debugger.Soft">
+      <HintPath>..\Assemblies\Techl.Mono.Debugger.Soft.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
