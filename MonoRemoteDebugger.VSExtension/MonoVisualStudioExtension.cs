@@ -14,6 +14,7 @@ using NLog;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.MIDebugEngine;
+using System.Collections.Generic;
 
 namespace MonoRemoteDebugger.VSExtension
 {
@@ -43,17 +44,73 @@ namespace MonoRemoteDebugger.VSExtension
         {
             var sb = (SolutionBuild2) _dte.Solution.SolutionBuild;
             string project = ((Array) sb.StartupProjects).Cast<string>().First();
-            Project startupProject;
+
             try
             {
-                startupProject = _dte.Solution.Item(project);
+                var projects = Projects(_dte.Solution);
+                foreach (var p in projects)
+                {
+                    if (p.UniqueName == project)
+                        return p;
+                }
+                //startupProject = _dte.Solution.Item(project);
             }
-            catch(ArgumentException aex)
+            catch (ArgumentException aex)
             {
                 throw new ArgumentException($"The parameter '{project}' is incorrect.", aex);
             }
 
-            return startupProject;
+            throw new ArgumentException($"The parameter '{project}' is incorrect.");
+        }
+
+        public static IList<Project> Projects(Solution solution)
+        {
+            Projects projects = solution.Projects;
+            List<Project> list = new List<Project>();
+            var item = projects.GetEnumerator();
+            while (item.MoveNext())
+            {
+                var project = item.Current as Project;
+                if (project == null)
+                {
+                    continue;
+                }
+
+                if (project.Kind == ProjectKinds.vsProjectKindSolutionFolder)
+                {
+                    list.AddRange(GetSolutionFolderProjects(project));
+                }
+                else
+                {
+                    list.Add(project);
+                }
+            }
+
+            return list;
+        }
+
+        private static IEnumerable<Project> GetSolutionFolderProjects(Project solutionFolder)
+        {
+            List<Project> list = new List<Project>();
+            for (var i = 1; i <= solutionFolder.ProjectItems.Count; i++)
+            {
+                var subProject = solutionFolder.ProjectItems.Item(i).SubProject;
+                if (subProject == null)
+                {
+                    continue;
+                }
+
+                // If this is another solution folder, do a recursive call, otherwise add
+                if (subProject.Kind == ProjectKinds.vsProjectKindSolutionFolder)
+                {
+                    list.AddRange(GetSolutionFolderProjects(subProject));
+                }
+                else
+                {
+                    list.Add(subProject);
+                }
+            }
+            return list;
         }
 
         internal string GetAssemblyPath(Project vsProject)

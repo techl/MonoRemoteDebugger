@@ -12,6 +12,11 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.0.11
+**2016-08-02**
+
+- [x] Fixed the bug "the parameter is incorrect" which is occurred if the project is inside solution folders.
+
 ## 1.0.10
 **2016-06-29**
 
