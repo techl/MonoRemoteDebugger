@@ -40,3 +40,6 @@ Enjoy you debugging.
 ### Version History
 <https://github.com/techl/MonoRemoteDebugger/blob/master/CHANGELOG.md>
 
+<br />
+
+This project is based on [MonoDebugger](https://github.com/giessweinapps/MonoDebugger). Thanks to Christian Giesswein.
