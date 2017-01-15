@@ -37,6 +37,10 @@ Enjoy you debugging.
 
 <br />
 
+### Known Issue
+Not supported breakpoint on user thread.
+Not supported Visual Basic.
+
 ### Version History
 <https://github.com/techl/MonoRemoteDebugger/blob/master/CHANGELOG.md>
 
