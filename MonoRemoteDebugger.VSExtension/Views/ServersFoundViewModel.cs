@@ -19,12 +19,14 @@ namespace MonoRemoteDebugger.VSExtension.Views
             Servers = new ObservableCollection<MonoServerInformation>();
             UserSettings settings = UserSettingsManager.Instance.Load();
             ManualIp = settings.LastIp;
+            AwaitTimeout = settings.LastTimeout;
             LookupServers(cts.Token);
         }
 
         public ObservableCollection<MonoServerInformation> Servers { get; set; }
         public MonoServerInformation SelectedServer { get; set; }
         public string ManualIp { get; set; }
+        public int AwaitTimeout { get; set; }
 
         private async void LookupServers(CancellationToken token)
         {
@@ -77,6 +79,8 @@ namespace MonoRemoteDebugger.VSExtension.Views
         {
             UserSettings settings = UserSettingsManager.Instance.Load();
             settings.LastIp = ManualIp;
+            //Check if value of timeout is greater than 0 before save. If not set default 10sec.
+            settings.LastTimeout = AwaitTimeout > 0 ? AwaitTimeout : 10000; 
             UserSettingsManager.Instance.Save(settings);
 
             cts.Cancel();

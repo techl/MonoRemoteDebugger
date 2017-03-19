@@ -8,6 +8,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ListBox ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer}" Margin="3">
             <ListBox.ItemTemplate>
@@ -34,6 +35,17 @@
         <ProgressBar Grid.Row="1" IsIndeterminate="True" Margin="3" Height="12" />
 
         <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MaxWidth="100px" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Timeout:" VerticalAlignment="Center" Margin="3" />
+            <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="3" Text="{Binding AwaitTimeout}" />
+            <TextBlock Grid.Column="2" Text="miliseconds" VerticalAlignment="Center" Margin="3" />
+        </Grid>
+
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />

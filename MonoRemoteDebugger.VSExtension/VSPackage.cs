@@ -189,11 +189,12 @@ namespace MonoRemoteDebugger.VSExtension
             {
                 try
                 {
+                    int timeout = dlg.ViewModel.AwaitTimeout;
                     monoExtension.BuildSolution();
                     if (dlg.ViewModel.SelectedServer != null)
-                        await monoExtension.AttachDebugger(dlg.ViewModel.SelectedServer.IpAddress.ToString());
+                        await monoExtension.AttachDebugger(dlg.ViewModel.SelectedServer.IpAddress.ToString(), timeout);
                     else if (!string.IsNullOrWhiteSpace(dlg.ViewModel.ManualIp))
-                        await monoExtension.AttachDebugger(dlg.ViewModel.ManualIp);
+                        await monoExtension.AttachDebugger(dlg.ViewModel.ManualIp, timeout);
                 }
                 catch (Exception ex)
                 {

@@ -125,7 +125,7 @@ namespace MonoRemoteDebugger.VSExtension
         }
 
 
-        internal async Task AttachDebugger(string ipAddress)
+        internal async Task AttachDebugger(string ipAddress, int timeout=10000)
         {
             string path = GetStartupAssemblyPath();
             string targetExe = Path.GetFileName(path);
@@ -141,7 +141,7 @@ namespace MonoRemoteDebugger.VSExtension
             var client = new DebugClient(appType, targetExe, outputDirectory);
             DebugSession session = await client.ConnectToServerAsync(ipAddress);
             await session.TransferFilesAsync();
-            await session.WaitForAnswerAsync();
+            await session.WaitForAnswerAsync(timeout);
 
             IntPtr pInfo = GetDebugInfo(ipAddress, targetExe, outputDirectory);
             var sp = new ServiceProvider((IServiceProvider) _dte);
