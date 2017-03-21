@@ -54,9 +54,10 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
             return Task.Factory.StartNew(TransferFiles);
         }
 
-        public async Task WaitForAnswerAsync()
+        
+        public async Task WaitForAnswerAsync(int _delay=10000)
         {
-            Task delay = Task.Delay(10000);
+            Task delay = Task.Delay(_delay);
             Task msg = await Task.WhenAny(communication.ReceiveAsync(), delay);
 
             if (msg is Task<MessageBase>)
