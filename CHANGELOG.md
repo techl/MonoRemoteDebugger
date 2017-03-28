@@ -12,6 +12,11 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.1.0
+**2017-03-28**
+
+- [x] Support Visual Studio 2017
+
 ## 1.0.11
 **2016-08-02**
 
