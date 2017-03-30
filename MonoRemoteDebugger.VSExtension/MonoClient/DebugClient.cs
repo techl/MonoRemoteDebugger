@@ -26,7 +26,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
             CurrentServer = IPAddress.Parse(ipAddress);
 
             var tcp = new TcpClient();
-            await tcp.ConnectAsync(CurrentServer, MonoDebugServer.TcpPort);
+            await tcp.ConnectAsync(CurrentServer, GlobalConfig.Current.ServerPort);
             return new DebugSession(this, _type, tcp.Client);
         }
     }

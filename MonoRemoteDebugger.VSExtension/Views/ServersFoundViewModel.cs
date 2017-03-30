@@ -7,6 +7,7 @@ using MonoRemoteDebugger.VSExtension.Settings;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Windows;
+using MonoRemoteDebugger.SharedLib;
 
 namespace MonoRemoteDebugger.VSExtension.Views
 {
@@ -27,6 +28,30 @@ namespace MonoRemoteDebugger.VSExtension.Views
         public MonoServerInformation SelectedServer { get; set; }
         public string ManualIp { get; set; }
         public int AwaitTimeout { get; set; }
+
+        public int ServerPort
+        {
+            get
+            {
+                return GlobalConfig.Current.ServerPort;
+            }
+            set
+            {
+                GlobalConfig.Current.ServerPort = value;
+            }
+        }
+
+        public int DebuggerAgentPort
+        {
+            get
+            {
+                return GlobalConfig.Current.DebuggerAgentPort;
+            }
+            set
+            {
+                GlobalConfig.Current.DebuggerAgentPort = value;
+            }
+        }
 
         private async void LookupServers(CancellationToken token)
         {
@@ -80,7 +105,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
             UserSettings settings = UserSettingsManager.Instance.Load();
             settings.LastIp = ManualIp;
             //Check if value of timeout is greater than 0 before save. If not set default 10sec.
-            settings.LastTimeout = AwaitTimeout > 0 ? AwaitTimeout : 10000; 
+            settings.LastTimeout = AwaitTimeout > 0 ? AwaitTimeout : 10000;
             UserSettingsManager.Instance.Save(settings);
 
             cts.Cancel();

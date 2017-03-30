@@ -15,6 +15,7 @@ using MICore;
 using MonoRemoteDebugger.Debugger.DebugEngineHost;
 using System.Diagnostics;
 using Techl;
+using MonoRemoteDebugger.SharedLib;
 
 namespace Microsoft.MIDebugEngine
 {
@@ -86,7 +87,7 @@ namespace Microsoft.MIDebugEngine
             if (_vm != null)
                 return;
 
-            _vm = VirtualMachineManager.Connect(new IPEndPoint(_ipAddress, 11000));
+            _vm = VirtualMachineManager.Connect(new IPEndPoint(_ipAddress, GlobalConfig.Current.DebuggerAgentPort));
             _vm.EnableEvents(EventType.AssemblyLoad,
                 EventType.ThreadStart,
                 EventType.ThreadDeath,
@@ -203,14 +204,14 @@ namespace Microsoft.MIDebugEngine
                 return true;
 
             bool resume = false;
-            
+
             AD7PendingBreakpoint bp;
             lock (_pendingBreakpoints)
                 bp = _pendingBreakpoints.FirstOrDefault(x => x.LastRequest == ev.Request);
 
             if (bp == null)
                 return true;
-            
+
             Mono.Debugger.Soft.StackFrame[] frames = ev.Thread.GetFrames();
             _engine.Callback.BreakpointHit(bp, _mainThread);
 

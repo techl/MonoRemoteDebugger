@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
+using Techl;
 
 namespace MonoRemoteDebugger.SharedLib.Server
 {
     public class MonoDebugServer : IDisposable
     {
-        public const int TcpPort = 13001;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
@@ -24,7 +24,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         public void Start()
         {
-            tcp = new TcpListener(IPAddress.Any, TcpPort);
+            tcp = new TcpListener(IPAddress.Any, GlobalConfig.Current.ServerPort);
             tcp.Start();
 
             listeningTask = Task.Factory.StartNew(() => StartListening(cts.Token), cts.Token);

@@ -74,6 +74,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+    <Reference Include="Techl, Version=0.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Assemblies\Techl.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\AssemblyInfo.cs">
@@ -85,6 +89,7 @@
     <Compile Include="ApplicationType.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="GlobalConfig.cs" />
     <Compile Include="MonoLogger.cs" />
     <Compile Include="MessageBase.cs" />
     <Compile Include="Server\ClientSession.cs" />

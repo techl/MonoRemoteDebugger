@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using Techl;
 
 namespace MonoRemoteDebugger.SharedLib.Server
 {
     public abstract class MonoProcess
     {
-        private int _monoDebugPort = 11000;
         protected Process _proc;
         public event EventHandler ProcessStarted;
         internal abstract Process Start(string workingDirectory);
@@ -27,7 +27,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
             IPAddress ip = IPAddress.Any;
             string args =
                 string.Format(
-                    @"--debugger-agent=address={0}:{1},transport=dt_socket,server=y --debug=mdb-optimizations", ip, _monoDebugPort);
+                    @"--debugger-agent=address={0}:{1},transport=dt_socket,server=y --debug=mdb-optimizations", ip, GlobalConfig.Current.DebuggerAgentPort);
             return args;
         }
 
