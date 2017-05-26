@@ -12,6 +12,11 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.2.1
+**2017-05-26**
+
+- [x] Support VS2013 in vsix
+
 ## 1.2.0
 **2017-03-30**
 
