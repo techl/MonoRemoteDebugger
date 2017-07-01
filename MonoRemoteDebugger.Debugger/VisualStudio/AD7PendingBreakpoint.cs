@@ -91,7 +91,7 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
             try
             {
-                LastRequest.Disable();
+                LastRequest?.Disable();
             }
             catch (VMDisconnectedException) { }
 

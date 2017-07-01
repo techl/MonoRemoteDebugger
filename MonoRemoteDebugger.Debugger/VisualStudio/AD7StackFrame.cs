@@ -26,17 +26,12 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             Debug.Assert(threadContext != null, "ThreadContext is null");
 
             Engine = engine;
-            this.Thread = thread;
-            this.ThreadContext = threadContext;
+            Thread = thread;
+            ThreadContext = threadContext;
 
             _textPosition = RoslynHelper.GetStatementRange(ThreadContext.FileName, ThreadContext.LineNumber, ThreadContext.ColumnNumber);
             _functionName = threadContext.Method.Name;
-
-            //if(threadContext.IsNativeTransition)
-            //{
-
-            //}
-
+            
             if (_textPosition != null)
             {
                 docContext = new AD7DocumentContext(_textPosition);
@@ -53,12 +48,52 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             ppExpr = null;
             string lookup = pszCode;
 
-
-            LocalVariable result = ThreadContext.GetVisibleVariableByName(lookup);
-            if (result != null)
+            Debug.WriteLine($"ParseText(pszCode={pszCode}, dwFlags={dwFlags}, nRadix={nRadix})");
+            try
             {
-                ppExpr = new AD7Expression(new MonoProperty(ThreadContext, result));
-                return VSConstants.S_OK;
+                //##############
+                // Step01: local
+                //##############
+
+                var local = ThreadContext.Method.GetLocals().Where(x => x.Name == pszCode).SingleOrDefault();
+                if (local != null)
+                {
+                    //Debug.WriteLine($"=> ParseText.LocalVariable: pszCode={pszCode}, Name={local?.Name}, Type={local?.Type?.FullName}");
+                    ppExpr = new AD7Expression(new MonoProperty(ThreadContext, local));
+                    return VSConstants.S_OK;
+                }
+
+                //##############################
+                // Step02: fields and properties
+                //##############################
+
+                var declaringType = ThreadContext.Method?.DeclaringType;
+                if (declaringType != null)
+                {
+                    var field = declaringType.GetFields().Where(x => x.Name == pszCode).FirstOrDefault();
+
+                    if (field != null)
+                    {
+                        //Debug.WriteLine($"=> ParseText.Field: pszCode={pszCode}, Name={field?.Name}, Type={field?.FieldType?.FullName}");
+                        ppExpr = new AD7Expression(new MonoProperty(ThreadContext, field));
+                        return VSConstants.S_OK;
+                    }
+
+                    var property = declaringType.GetProperties().Where(x => x.Name == pszCode).FirstOrDefault();
+
+                    if (property != null)
+                    {
+                        //Debug.WriteLine($"=> ParseText.Property: pszCode={pszCode}, Name={property?.Name}, Type={property?.PropertyType?.FullName}");
+                        ppExpr = new AD7Expression(new MonoProperty(ThreadContext, property));
+                        return VSConstants.S_OK;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                pbstrError = "Error: " + ex.Message;
+                pichError = (uint)pbstrError.Length;
+                return VSConstants.S_FALSE;
             }
 
             pbstrError = "Unsupported Expression";
@@ -136,17 +171,34 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
         internal FRAMEINFO GetFrameInfo(enum_FRAMEINFO_FLAGS dwFieldSpec)
         {
+            // CallstackInfo
             var frameInfo = new FRAMEINFO();
-            frameInfo.m_bstrFuncName = ThreadContext.Location.Method.Name;
+
+            var parameters = string.Join(", ", ThreadContext.Location.Method.GetParameters().Select(x => x.ParameterType.Name + " " + x.Name));
+            
+            // TODO get modul name instead of filename
+            frameInfo.m_bstrFuncName = $"{ThreadContext.FileName}!{ThreadContext.Location.Method.Name}({parameters}) Line {ThreadContext.Location.LineNumber}";
             frameInfo.m_bstrModule = ThreadContext.FileName;
             frameInfo.m_pFrame = this;
             frameInfo.m_fHasDebugInfo = 1;
-            frameInfo.m_fStaleCode = 0;
-
+            frameInfo.m_fStaleCode = 0;            
+            frameInfo.m_bstrReturnType = ThreadContext.Location.Method.ReturnType.Name;
+            
             frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_STALECODE;
             frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_DEBUGINFO;
             frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_MODULE;
-            frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_FUNCNAME;
+            frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_FUNCNAME;            
+            frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_RETURNTYPE;
+
+            if (docContext != null)
+            {
+                string pbstrLanguage = null;
+                Guid pguidLanguage = default(Guid);
+                docContext.GetLanguageInfo(ref pbstrLanguage, ref pguidLanguage);
+                frameInfo.m_bstrLanguage = pbstrLanguage;
+                frameInfo.m_dwValidFields |= enum_FRAMEINFO_FLAGS.FIF_LANGUAGE;
+            }
+
             return frameInfo;
         }
     }
