@@ -22,5 +22,7 @@ namespace MonoRemoteDebugger.SharedLib
 
         public int ServerPort { get; set; } = AppSettings.Get("ServerPort", 13001);
         public int DebuggerAgentPort { get; set; } = AppSettings.Get("DebuggerAgentPort", 11000);
+        public string LibMonoApplicationPath { get; set; } = AppSettings.Get("LibMonoApplicationPath", "");
+        public string ShellScriptInstallPath { get; set; } = AppSettings.Get("ShellScriptInstallPath", "");
     }
 }

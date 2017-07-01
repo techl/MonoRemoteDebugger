@@ -9,6 +9,8 @@ namespace MonoRemoteDebugger.Server
         {
             MonoLogger.Setup();
 
+            MonoUtils.EnsurePdb2MdbCallWorks();
+
             using (var server = new MonoDebugServer())
             {
                 server.StartAnnouncing();
