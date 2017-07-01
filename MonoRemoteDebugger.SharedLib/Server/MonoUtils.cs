@@ -25,12 +25,15 @@ namespace MonoRemoteDebugger.SharedLib.Server
             }
             catch (Exception ex)
             {
-                logger.Error($"Can not find and run {fileName}!", ex);
-                AddShellScriptToMonoApp();
+                logger.Info($"Can not find and run {fileName}! Calling {nameof(AddShellScriptToMonoApp)} ...");
+                if (!AddShellScriptToMonoApp())
+                {
+                    logger.Error(ex, $"Can not find and run {fileName}!");
+                }
             }
         }
 
-        private static void AddShellScriptToMonoApp()
+        private static bool AddShellScriptToMonoApp()
         {
             try
             {
@@ -38,14 +41,14 @@ namespace MonoRemoteDebugger.SharedLib.Server
                 if (string.IsNullOrWhiteSpace(libMonoApplicationPath) || !Directory.Exists(libMonoApplicationPath))
                 {
                     logger.Error($"{nameof(AddShellScriptToMonoApp)}: Path {libMonoApplicationPath} from 'App.config/configuration/appSettings/{nameof(GlobalConfig.Current.LibMonoApplicationPath)}' not found!");
-                    return;
+                    return false;
                 }
 
                 var shellScriptInstallPath = GlobalConfig.Current.ShellScriptInstallPath;
                 if (string.IsNullOrWhiteSpace(shellScriptInstallPath) || !Directory.Exists(shellScriptInstallPath))
                 {
                     logger.Error($"{nameof(AddShellScriptToMonoApp)}: Path {shellScriptInstallPath} from 'App.config/configuration/appSettings/{nameof(GlobalConfig.Current.ShellScriptInstallPath)}' not found!");
-                    return;
+                    return false;
                 }
             
                 if (Environment.OSVersion.Platform == PlatformID.Unix)
@@ -55,13 +58,16 @@ namespace MonoRemoteDebugger.SharedLib.Server
                 }
                 else
                 {
-                    throw new NotImplementedException($"Workaround for missing {MonoUtils.GetPdb2MdbPath()} is implemented only for unix (support for embedded linux)!");
+                    logger.Error($"Workaround for missing {MonoUtils.GetPdb2MdbPath()} is implemented only for unix (support for embedded linux)!");
                 }
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"{nameof(AddShellScriptToMonoApp)} failed!");
+                return false;
             }
+
+            return true;
         }
 
         private static void AddShellScriptToMonoApp(string libMonoApplicationPath, string shellScriptInstallPath, string programExeName)
@@ -69,7 +75,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
             var programExePath = Path.Combine(libMonoApplicationPath, $"{programExeName}.exe");
             logger.Trace($"Add shell script {shellScriptInstallPath}{programExeName} for {programExePath} ...");
             File.WriteAllText($"{shellScriptInstallPath}{programExeName}", $@"#!/bin/sh{Environment.NewLine}{shellScriptInstallPath}mono {programExePath} ""$@""");
-            StartProcess("chmod", $"+x {shellScriptInstallPath}{programExeName}");
+            StartProcess("chmod", $"+x {shellScriptInstallPath}{programExeName}");            
         }
 
         private static void StartProcess(string fileName, string args)

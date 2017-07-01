@@ -4,32 +4,34 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml;
+using System.Linq;
 using NLog;
 
 namespace MonoRemoteDebugger.SharedLib.Server
 {
     internal class ClientSession
     {
-        private readonly TcpCommunication communication;
-        private readonly string directoryName;
+        private readonly TcpCommunication communication;        
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IPAddress remoteEndpoint;
-        private readonly string root = Path.Combine(Path.GetTempPath(), "MonoRemoteDebugger");
+        private readonly string tempContentDirectory;
+        private readonly int skipLastUsedContentDirectories;
         private Process proc;
+
+        private string directoryName;
         private string targetExe;
 
         public ClientSession(Socket socket)
         {
-            directoryName = Path.Combine(root, Path.GetRandomFileName());
-            remoteEndpoint = ((IPEndPoint)socket.RemoteEndPoint).Address;
+            var basePath = new FileInfo(typeof(MonoLogger).Assembly.Location).Directory.FullName;
+            tempContentDirectory = Path.Combine(basePath, "Temp");
+            
+            remoteEndpoint = ((IPEndPoint)socket.RemoteEndPoint).Address;            
             communication = new TcpCommunication(socket);
-        }
 
-        private string ZipFileName
-        {
-            get { return directoryName + ".zip"; }
+            skipLastUsedContentDirectories = GlobalConfig.Current.SkipLastUsedContentDirectories;
         }
-
+        
         public void HandleSession()
         {
             try
@@ -43,11 +45,19 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
                     MessageBase msg = communication.Receive();
 
+                    if (msg == null)
+                    {
+                        logger.Info("Null-Message received");
+                        return;
+                    }
+
                     switch (msg.Command)
                     {
+                        case Command.DebugLastContent:
                         case Command.DebugContent:
-                            StartDebugging((StartDebuggingMessage)msg.Payload);
-                            communication.Send(Command.StartedMono, new StatusMessage());
+                            logger.Info($"{msg.Command.ToString()}-Message received");
+                            var successful = StartDebugging((StartDebuggingMessage)msg.Payload);
+                            communication.Send(Command.StartedMono, new StatusMessage() { Successful = successful });
                             break;
                         case Command.Shutdown:
                             logger.Info("Shutdown-Message received");
@@ -69,31 +79,59 @@ namespace MonoRemoteDebugger.SharedLib.Server
                     proc.Kill();
             }
         }
-
-        private void StartDebugging(StartDebuggingMessage msg)
+        
+        private bool StartDebugging(StartDebuggingMessage msg)
         {
-            if (!Directory.Exists(root))
-                Directory.CreateDirectory(root);
+            if (!Directory.Exists(tempContentDirectory))
+            {
+                Directory.CreateDirectory(tempContentDirectory);
+            }
 
             targetExe = msg.FileName;
+            
+            directoryName = Path.Combine(tempContentDirectory, msg.AppHash);
 
-            logger.Trace("Receiving content from {0}", remoteEndpoint);
-            File.WriteAllBytes(ZipFileName, msg.DebugContent);
-            ZipFile.ExtractToDirectory(ZipFileName, directoryName);
+            if (msg.DebugContent == null || msg.DebugContent.Length == 0)
+            {
+                logger.Trace($"Check if content is already available from {remoteEndpoint}: {directoryName}");
 
-            foreach (string file in Directory.GetFiles(directoryName, "*vshost*"))
-                File.Delete(file);
+                if (!Directory.Exists(directoryName))
+                {
+                    logger.Trace("Content not found. Request new content from {0} ...", remoteEndpoint);
+                    return false;
+                }
+            }
+            else
+            {
+                logger.Trace("Receiving content from {0}", remoteEndpoint);
 
-            File.Delete(ZipFileName);
-            logger.Trace("Extracted content from {0} to {1}", remoteEndpoint, directoryName);
+                var zipFileName = directoryName + ".zip";
 
-            var generator = new Pdb2MdbGenerator();
-            string binaryDirectory = msg.AppType == ApplicationType.Desktopapplication
-                ? directoryName
-                : Path.Combine(directoryName, "bin");
-            generator.GeneratePdb2Mdb(binaryDirectory);
+                File.WriteAllBytes(zipFileName, msg.DebugContent);
+                ZipFile.ExtractToDirectory(zipFileName, directoryName);
+
+                foreach (string file in Directory.GetFiles(directoryName, "*vshost*"))
+                {
+                    File.Delete(file);
+                }
+
+                File.Delete(zipFileName);
+                logger.Trace("Extracted content from {0} to {1}", remoteEndpoint, directoryName);
+
+                var generator = new Pdb2MdbGenerator();
+
+                string binaryDirectory = msg.AppType == ApplicationType.Desktopapplication
+                    ? directoryName
+                    : Path.Combine(directoryName, "bin");
+
+                logger.Trace($"AppType: {msg.AppType} => choosing binaryDirectory={binaryDirectory}");
+
+                generator.GeneratePdb2Mdb(binaryDirectory);
+            }            
 
             StartMono(msg.AppType);
+
+            return true;
         }
 
         private void StartMono(ApplicationType type)
@@ -119,11 +157,21 @@ namespace MonoRemoteDebugger.SharedLib.Server
             Console.WriteLine("Program closed: " + proc.ExitCode);
             try
             {
-                Directory.Delete(directoryName, true);
+                var oldTempDirectories = Directory.GetDirectories(tempContentDirectory)
+                    .OrderByDescending(x => new DirectoryInfo(x).LastWriteTime)
+                    .Skip(skipLastUsedContentDirectories); // keep last X directories
+
+                foreach (string oldDirectory in oldTempDirectories)
+                {
+                    if (oldDirectory != directoryName)
+                    {
+                        Directory.Delete(oldDirectory, true);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                logger.Trace("Cant delete {0} - {1}", directoryName, ex.Message);
+                logger.Error(ex, $"Can't delete old temp directories from {tempContentDirectory}!");
             }
         }
     }

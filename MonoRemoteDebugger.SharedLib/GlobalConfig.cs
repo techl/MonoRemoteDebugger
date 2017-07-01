@@ -24,5 +24,6 @@ namespace MonoRemoteDebugger.SharedLib
         public int DebuggerAgentPort { get; set; } = AppSettings.Get("DebuggerAgentPort", 11000);
         public string LibMonoApplicationPath { get; set; } = AppSettings.Get("LibMonoApplicationPath", "");
         public string ShellScriptInstallPath { get; set; } = AppSettings.Get("ShellScriptInstallPath", "");
+        public int SkipLastUsedContentDirectories { get; set; } = AppSettings.Get("SkipLastUsedContentDirectories", 3);
     }
 }

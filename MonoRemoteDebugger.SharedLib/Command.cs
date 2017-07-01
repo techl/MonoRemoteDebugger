@@ -10,6 +10,8 @@ namespace MonoRemoteDebugger.SharedLib
         [EnumMember]
         StartedMono,
         [EnumMember] 
-        Shutdown
+        Shutdown,
+        [EnumMember]
+        DebugLastContent
     }
 }
