@@ -12,6 +12,14 @@ download in the
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
 
+## 1.3.0
+**2017-07-04**
+
+- [x] [Added support for Windows 10 with Mono 64Bit](https://github.com/techl/MonoRemoteDebugger/pull/39/commits/912b5c4f9fac23d21ae2b1313ec08cf68522c57b)
+- [x] [New Feature: Debug last content if AppHash is equal. No content transfer needed (reason: faster debugging for embedded devices if content hasn't changed)](https://github.com/techl/MonoRemoteDebugger/pull/39/commits/f4d256c806278ec9bf86c7f799ebe08a2ab90de6)
+- [x] [Support for complex objects (arrays, struct, class, local, parameters) and callstack added](https://github.com/techl/MonoRemoteDebugger/pull/39/commits/60215b17fc7667a96d24d1dec091fe3d2f841fbb)
+- [x] [Better printing support for string, struct, object, jagged array and multidimensional array](https://github.com/techl/MonoRemoteDebugger/pull/39/commits/83f84c1fd7c38e9fa9ac2a6a8dade60427a7e171)
+
 ## 1.2.1
 **2017-05-26**
 
