@@ -77,7 +77,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
                 var msg = await WaitForAnswerAsync(delay);
                 return (msg.Command == Command.StartedMono && ((StatusMessage)msg.Payload).Successful);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
