@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using NLog;
 
 namespace MonoRemoteDebugger.SharedLib
 {
@@ -12,6 +13,7 @@ namespace MonoRemoteDebugger.SharedLib
     {
         private readonly DataContractSerializer _serializer;
         private readonly Socket _socket;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public TcpCommunication(Socket socket)
         {
@@ -50,20 +52,28 @@ namespace MonoRemoteDebugger.SharedLib
 
         private MessageBase ReceiveContent(int size)
         {
-            using (var ms = new MemoryStream())
+            try
             {
-                int totalReceived = 0;
-                while (totalReceived != size)
+                using (var ms = new MemoryStream())
                 {
-                    var buffer = new byte[Math.Min(1024*10, size - totalReceived)];
-                    int received = _socket.Receive(buffer);
-                    totalReceived += received;
-                    ms.Write(buffer, 0, received);
-                }
+                    int totalReceived = 0;
+                    while (totalReceived != size)
+                    {
+                        var buffer = new byte[Math.Min(1024 * 10, size - totalReceived)];
+                        int received = _socket.Receive(buffer);
+                        totalReceived += received;
+                        ms.Write(buffer, 0, received);
+                    }
 
-                ms.Seek(0, SeekOrigin.Begin);
-                return _serializer.ReadObject(ms) as MessageBase;
+                    ms.Seek(0, SeekOrigin.Begin);
+                    return _serializer.ReadObject(ms) as MessageBase;
+                }
             }
+            catch (Exception ex)
+            {
+                logger.Error(ex, $"ReceiveContent({size}) failed!");
+                return null;
+            }            
         }
 
         public Task<MessageBase> ReceiveAsync()

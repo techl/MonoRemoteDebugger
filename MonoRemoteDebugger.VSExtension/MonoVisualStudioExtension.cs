@@ -15,6 +15,7 @@ using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.MIDebugEngine;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace MonoRemoteDebugger.VSExtension
 {
@@ -130,6 +131,7 @@ namespace MonoRemoteDebugger.VSExtension
             string path = GetStartupAssemblyPath();
             string targetExe = Path.GetFileName(path);
             string outputDirectory = Path.GetDirectoryName(path);
+            string appHash = ComputeHash(path);
 
             Project startup = GetStartupProject();
 
@@ -138,10 +140,15 @@ namespace MonoRemoteDebugger.VSExtension
             if (appType == ApplicationType.Webapplication)
                 outputDirectory += @"\..\..\";
 
-            var client = new DebugClient(appType, targetExe, outputDirectory);
+            var client = new DebugClient(appType, targetExe, outputDirectory, appHash);
             DebugSession session = await client.ConnectToServerAsync(ipAddress);
-            await session.TransferFilesAsync();
-            await session.WaitForAnswerAsync(timeout);
+            var debugSessionStarted = await session.RestartDebuggingAsync(timeout);
+
+            if (!debugSessionStarted)
+            {
+                await session.TransferFilesAsync();
+                await session.WaitForAnswerAsync(timeout);
+            }
 
             IntPtr pInfo = GetDebugInfo(ipAddress, targetExe, outputDirectory);
             var sp = new ServiceProvider((IServiceProvider) _dte);
@@ -170,6 +177,16 @@ namespace MonoRemoteDebugger.VSExtension
             {
                 if (pInfo != IntPtr.Zero)
                     Marshal.FreeCoTaskMem(pInfo);
+            }
+        }
+
+        public static string ComputeHash(string file)
+        {
+            using (FileStream stream = File.OpenRead(file))
+            {
+                var sha = new SHA256Managed();
+                byte[] checksum = sha.ComputeHash(stream);
+                return BitConverter.ToString(checksum).Replace("-", string.Empty);
             }
         }
 

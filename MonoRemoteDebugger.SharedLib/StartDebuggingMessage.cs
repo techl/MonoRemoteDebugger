@@ -12,6 +12,9 @@ namespace MonoRemoteDebugger.SharedLib
         public ApplicationType AppType { get; set; }
 
         [DataMember]
+        public string AppHash { get; set; }
+
+        [DataMember]
         public byte[] DebugContent { get; set; }
     }
 }

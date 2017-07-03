@@ -10,17 +10,19 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
     {
         private readonly ApplicationType _type;
 
-        public DebugClient(ApplicationType type, string targetExe, string outputDirectory)
+        public DebugClient(ApplicationType type, string targetExe, string outputDirectory, string appHash)
         {
             _type = type;
             TargetExe = targetExe;
             OutputDirectory = outputDirectory;
+            AppHash = appHash;
         }
 
         public string TargetExe { get; set; }
         public string OutputDirectory { get; set; }
+        public string AppHash { get; set; }
         public IPAddress CurrentServer { get; private set; }
-
+        
         public async Task<DebugSession> ConnectToServerAsync(string ipAddress)
         {
             CurrentServer = IPAddress.Parse(ipAddress);

@@ -5,61 +5,204 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
 using Mono.Debugger.Soft;
 using Microsoft.MIDebugEngine;
+using System.Reflection;
 
 namespace MonoRemoteDebugger.Debugger.VisualStudio
 {
-    internal class ExpandedProperty
-    {
-        private readonly StackFrame frame;
-        private readonly LocalVariable localVariable;
-        private readonly List<Mirror> allProperties;
-
-        public ExpandedProperty(TypeMirror typeMirror, StackFrame frame, LocalVariable localVariable)
-        {
-            this.frame = frame;
-            this.localVariable = localVariable;
-            var properties = typeMirror.GetProperties().Cast<Mirror>();
-            var methods = typeMirror.GetMethods().Cast<Mirror>();
-            var fields = typeMirror.GetFields().Cast<Mirror>();
-            var children = properties.Concat(methods).Concat(fields);
-            allProperties = children.ToList();
-        }
-    }
-
     internal class MonoProperty : IDebugProperty2
     {
-        private readonly StackFrame frame;
-        private readonly LocalVariable variable;
-        private readonly TypeMirror mirror;
-        private readonly Mirror childMirror;
+        private readonly StackFrame _stackFrame;
+        private readonly Mirror _currentMirror;
+        private readonly ObjectMirror _parentMirror;
+        private readonly StructMirror _parentStructMirror;
+        private readonly TypeMirror _arrayElementType;
+        private readonly Value _arrayValue;
+        private readonly string _arrayIndices;
 
-        public MonoProperty(StackFrame frame, LocalVariable variable)
-            : this(frame, variable, null, null)
+        public MonoProperty(StackFrame frame, Mirror currentMirror)
         {
+            _stackFrame = frame;
+            _currentMirror = currentMirror;
         }
 
-        public MonoProperty(StackFrame frame, LocalVariable localVariable, TypeMirror typeMirror, Mirror childMirror)
+        public MonoProperty(StackFrame frame, Mirror currentMirror, ObjectMirror parentMirror)
+            : this(frame, currentMirror)
         {
-            this.frame = frame;
-            this.variable = localVariable;
-            this.mirror = typeMirror;
-            this.childMirror = childMirror;
+            _parentMirror = parentMirror;
+        }
+
+        public MonoProperty(StackFrame frame, Mirror currentMirror, StructMirror parentStructMirror)
+            : this(frame, currentMirror)
+        {
+            _parentStructMirror = parentStructMirror;
+        }
+
+        public MonoProperty(StackFrame frame, Mirror currentMirror, TypeMirror arrayElementType, Value arrayValue, string arrayIndices)
+            : this(frame, currentMirror)
+        {
+            _arrayElementType = arrayElementType;
+            _arrayValue = arrayValue;
+            _arrayIndices = arrayIndices;
         }
 
         public int EnumChildren(enum_DEBUGPROP_INFO_FLAGS dwFields, uint dwRadix, ref Guid guidFilter,
             enum_DBG_ATTRIB_FLAGS dwAttribFilter, string pszNameFilter, uint dwTimeout,
             out IEnumDebugPropertyInfo2 ppEnum)
         {
-            var typeMirror = variable.Type;
-            var properties = typeMirror.GetProperties().Cast<Mirror>();
-            var methods = typeMirror.GetMethods();
-            var fields = typeMirror.GetFields();
-            var children = properties.Concat(methods).Concat(fields).ToList();
+            string error = null;
+            var attributeInfo = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_NONE;
+            Value value = _arrayValue ?? GetValue(_currentMirror, out attributeInfo, out error);
 
-            ppEnum = new AD7PropertyEnum(children.Select(x => new MonoProperty(frame, variable, typeMirror, x).GetDebugPropertyInfo(dwFields)).ToArray());
+            //System.Diagnostics.Debug.WriteLine($"--- EnumChildren from Type {_currentMirror?.GetType().FullName} - _arrayValue: {_arrayValue != null} ValueInternalType: {value?.GetType().FullName}");
+            
+            if (value is ArrayMirror)
+            {
+                var array = ((ArrayMirror)value);
+                if (array.Rank == 1)
+                {
+                    ppEnum = new AD7PropertyEnum(array.GetValues(0, array.Length).Select((x, i) => new MonoProperty(_stackFrame, _currentMirror, array.Type.GetElementType(), x, i.ToString()).GetDebugPropertyInfo(dwFields)).ToArray());
+                }
+                else
+                {
+                    // multidim array [,,]
+                    DEBUG_PROPERTY_INFO[] arrayValues = CreateMultiDimArrayPropertyInfos(dwFields, array);
+                    ppEnum = new AD7PropertyEnum(arrayValues);
+                }
+                return VSConstants.S_OK;
+            }
+            else if (value is StructMirror)
+            {
+                var obj = value as StructMirror;
+
+                var properties = obj.Type.GetProperties().Cast<Mirror>();
+                var fields = obj.Type.GetFields();
+                var children = properties.Concat(fields).ToList();
+
+                ppEnum = new AD7PropertyEnum(children.Select(x => new MonoProperty(_stackFrame, x, obj).GetDebugPropertyInfo(dwFields)).ToArray());
+                
+                return VSConstants.S_OK;
+            }
+            else if (value is ObjectMirror)
+            {
+                var obj = value as ObjectMirror;
+                
+                var properties = obj.Type.GetProperties().Cast<Mirror>();
+                var fields = obj.Type.GetFields();
+                
+                var children = properties.Concat(fields).ToList();
+
+                ppEnum = new AD7PropertyEnum(children.Select(x => new MonoProperty(_stackFrame, x, obj).GetDebugPropertyInfo(dwFields)).ToArray());
+                return VSConstants.S_OK;
+            }
+            else
+            {
+                //TODO
+            }
+
+            //TODO 
+            ppEnum = new AD7PropertyEnum(new DEBUG_PROPERTY_INFO[0]);
             return VSConstants.S_OK;
         }
+        
+        private Value GetValue(Mirror mirror, out enum_DBG_ATTRIB_FLAGS attributeInfo, out string errorMessage)
+        {
+            Value value = null;
+            attributeInfo = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_NONE;
+            errorMessage = null;
 
+            try
+            {
+                if (mirror is LocalVariable)
+                {
+                    var localMirror = mirror as LocalVariable;
+                    value = _stackFrame.GetValue(localMirror);
+                }
+                else if (mirror is FieldInfoMirror)
+                {
+                    var fieldMirror = mirror as FieldInfoMirror;
+                    attributeInfo = GetAttributeInfo(fieldMirror.Attributes);
+                
+                    if (fieldMirror.IsStatic)
+                    {                    
+                        value = fieldMirror.DeclaringType?.GetValue(fieldMirror);
+                    }
+                    else if (_parentStructMirror != null)
+                    {
+                        value = _parentStructMirror[fieldMirror.Name];
+                    }
+                    else
+                    {
+                        var obj = _parentMirror ?? _stackFrame.GetThis() as ObjectMirror;
+                        if (obj != null)
+                        {
+                            value = obj.GetValue(fieldMirror);                        
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"FieldInfoMirror - not static - this unknown: {obj?.GetType().FullName}");
+                            errorMessage = $"Field is not in scope!";
+                        }                    
+                    }
+                }
+                else if (mirror is PropertyInfoMirror)
+                {
+                    var propertyMirror = mirror as PropertyInfoMirror;                
+                    var getMethod = propertyMirror.GetGetMethod(true);
+
+                    if (getMethod == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"--- GetValue getMethod is NULL!!!: {propertyMirror?.GetType().Name} ");
+                        errorMessage = $"Error: GetMethod is null!";
+                    }
+                    else
+                    {
+                        attributeInfo = GetAttributeInfo(getMethod.Attributes);
+
+                        var getMethodParams = getMethod.GetParameters();
+                        if (getMethodParams.Length > 0)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"getMethodParams.Length = {getMethodParams.Length} - not supported!");
+                            errorMessage = $"Index property is not supported!";                        
+                        }
+                        else if (getMethod.IsStatic)
+                        {
+                            value = propertyMirror.DeclaringType?.InvokeMethod(_stackFrame.Thread, getMethod, Enumerable.Empty<Value>().ToList());
+                        }
+                        else if (_parentStructMirror != null)
+                        {
+                            value = _parentStructMirror.InvokeMethod(_stackFrame.Thread, getMethod, Enumerable.Empty<Value>().ToList());
+                        }
+                        else
+                        {
+                            var obj = _parentMirror ?? _stackFrame.GetThis() as ObjectMirror;
+                            if (obj != null)
+                            {
+                                value = obj.InvokeMethod(_stackFrame.Thread, getMethod, Enumerable.Empty<Value>().ToList());
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"PropertyInfoMirror - not static - this unknown: {obj?.GetType().FullName}");
+                                errorMessage = $"Property is not in scope!";
+                            }
+                        }
+                    }
+                }
+                else if (mirror != null)
+                {
+                    errorMessage = $"Error: Mirror is not supported ({mirror?.GetType().FullName})";
+                }
+                else
+                {
+                    errorMessage = $"Error: Mirror is null!";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Value error: {ex.Message}";
+            }
+            return value;
+        }
+        
         public int GetDerivedMostProperty(out IDebugProperty2 ppDerivedMost)
         {
             throw new NotImplementedException();
@@ -117,47 +260,88 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
         internal DEBUG_PROPERTY_INFO GetDebugPropertyInfo(enum_DEBUGPROP_INFO_FLAGS dwFields)
         {
             var propertyInfo = new DEBUG_PROPERTY_INFO();
-            var info = GetMirrorInfo();
+
+            var mirrorInfo = GetMirrorInfo(_currentMirror) ?? new MirrorCommonInfo { FullName = "UNKNOWN-FullName", Name = "UNKNOWN-Name", Type = null };
+
+            System.Diagnostics.Debug.WriteLine($"GetDebugPropertyInfo: {_currentMirror?.GetType().Name} - typeMirror: {_arrayElementType?.ToString()} childMirror: {_arrayValue?.GetType().FullName}");
+                        
             if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME) != 0)
             {
-                propertyInfo.bstrFullName = info != null ? info.Name : variable.Name;
+                propertyInfo.bstrFullName = mirrorInfo.Name;
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_FULLNAME;
             }
 
             if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_NAME) != 0)
             {
-                propertyInfo.bstrName = info != null ? info.Name : variable.Name;
+                propertyInfo.bstrName = (_arrayIndices != null) ? $"[{_arrayIndices}]" : mirrorInfo.Name;
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_NAME;
             }
 
             if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_TYPE) != 0)
             {
-                if (info != null)
-                {
-                    if (info.PropertyType != null)
-                        propertyInfo.bstrType = info.PropertyType.FullName;
-                }
-                else
-                    propertyInfo.bstrType = variable.Type.Namespace + "." + variable.Type.Name;
+                propertyInfo.bstrType = mirrorInfo.Type?.FullName ?? "UNKNOWN-Type";
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_TYPE;
             }
 
-            if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_VALUE) != 0 && info == null)
+            var isExpandable = false;
+
+            var attributeInfos = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_NONE;
+
+            string valueError = null;
+            Value value = _arrayValue ?? GetValue(_currentMirror, out attributeInfos, out valueError);
+            
+            if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_VALUE) != 0)
             {
-                Value value = frame.GetValue(variable);
-                if (value is ObjectMirror)
+                if (value is StringMirror)
                 {
+                    var obj = ((StringMirror)value);
+                    propertyInfo.bstrValue = $"\"{obj.Value}\"";
+                    propertyInfo.dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_RAW_STRING;
+                }
+                else if (value is ArrayMirror)
+                {
+                    var obj = ((ArrayMirror)value);
+                    isExpandable = obj.Length > 0;
+                    if (obj.Rank == 1)
+                    {
+                        propertyInfo.bstrValue = $"{{{obj.Type.GetElementType().Name}[{obj.Length}]}}";
+                    }
+                    else
+                    {
+                        // Support multi dim array [,,]
+                        var dimUpperBound = new int[obj.Rank];
+                        for (int dim = 0; dim < obj.Rank; dim++)
+                        {
+                            dimUpperBound[dim] = obj.GetLowerBound(dim) + obj.GetLength(dim);
+                        }
+
+                        propertyInfo.bstrValue = $"{_arrayElementType?.Name ?? obj.Type.GetElementType().Name}[{string.Join(",", dimUpperBound)}]";
+                    }
+                }
+                else if (value is StructMirror)
+                {
+                    isExpandable = true;
+                    var obj = ((StructMirror)value);                    
+                    propertyInfo.bstrValue = $"{{{obj.Type.Namespace}.{obj.Type.Name}}}";
+                }
+                else if (value is ObjectMirror)
+                {
+                    isExpandable = true;
                     var obj = ((ObjectMirror)value);
-                    MethodMirror toStringMethod = obj.Type.GetMethod("ToString");
-                    value = obj.InvokeMethod(frame.Thread, toStringMethod, Enumerable.Empty<Value>().ToList(),
-                        InvokeOptions.DisableBreakpoints);
-                    propertyInfo.bstrValue = ((StringMirror)value).Value;
+                    propertyInfo.bstrValue = $"{{{obj.Type.Namespace}.{obj.Type.Name}}}";
                 }
                 else if (value is PrimitiveValue)
                 {
                     var obj = ((PrimitiveValue)value);
-                    if (obj.Value != null)
-                        propertyInfo.bstrValue = obj.Value.ToString();
+                    propertyInfo.bstrValue = obj.Value?.ToString() ?? $"null";
+                }
+                else if (value != null)
+                {
+                    propertyInfo.bstrValue = $"Unsupported value has Type: {value?.GetType().FullName}";
+                }
+                else
+                {
+                    propertyInfo.bstrValue = valueError ?? $"Value evaluation error!";
                 }
 
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_VALUE;
@@ -167,14 +351,17 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
             {
                 propertyInfo.dwAttrib = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_VALUE_READONLY;
 
-                if (IsExpandable())
+                if (isExpandable)
                 {
                     propertyInfo.dwAttrib |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_OBJ_IS_EXPANDABLE;
                 }
+                
+                propertyInfo.dwAttrib |= attributeInfos;
+
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_ATTRIB;
             }
 
-            if (((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_PROP) != 0) || IsExpandable())
+            if ((dwFields & enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_PROP) != 0)
             {
                 propertyInfo.pProperty = this;
                 propertyInfo.dwFields |= enum_DEBUGPROP_INFO_FLAGS.DEBUGPROP_INFO_PROP;
@@ -182,13 +369,17 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
             return propertyInfo;
         }
-
-        private PropertyChildInfo GetMirrorInfo()
+        
+        private MirrorCommonInfo GetMirrorInfo(Mirror mirror)
         {
-            PropertyChildInfo childInfo = null;
-            var methodMirror = childMirror as MethodMirror;
-            var propertyMirror = childMirror as PropertyInfoMirror;
-            var fieldMirror = childMirror as FieldInfoMirror;
+            MirrorCommonInfo info = null;
+            
+            //var methodMirror = mirror as MethodMirror;
+            var propertyMirror = mirror as PropertyInfoMirror;
+            var fieldMirror = mirror as FieldInfoMirror;
+            var parameterMirror = mirror as ParameterInfoMirror;
+            var localMirror = mirror as LocalVariable;
+
             //if (methodMirror != null)
             //{
             //    childInfo = new PropertyChildInfo();
@@ -199,32 +390,131 @@ namespace MonoRemoteDebugger.Debugger.VisualStudio
 
             if (propertyMirror != null)
             {
-                childInfo = new PropertyChildInfo();
-                childInfo.Name = propertyMirror.Name;
-                childInfo.FullName = propertyMirror.PropertyType.FullName;
-                childInfo.PropertyType = propertyMirror.PropertyType;
+                info = new MirrorCommonInfo();
+                info.Name = propertyMirror.Name;
+                info.FullName = propertyMirror.PropertyType.FullName;
+                info.Type = propertyMirror.PropertyType;
             }
             else if (fieldMirror != null)
             {
-                childInfo = new PropertyChildInfo();
-                childInfo.Name = fieldMirror.Name;
-                childInfo.FullName = fieldMirror.FieldType.FullName;
-                childInfo.PropertyType = fieldMirror.FieldType;
+                info = new MirrorCommonInfo();
+                info.Name = fieldMirror.Name;
+                info.FullName = fieldMirror.FieldType.FullName;
+                info.Type = fieldMirror.FieldType;
+            }
+            else if (parameterMirror != null)
+            {
+                info = new MirrorCommonInfo();
+                info.Name = parameterMirror.Name;
+                info.FullName = parameterMirror.ParameterType.FullName;
+                info.Type = parameterMirror.ParameterType;
+            }
+            else if (localMirror != null)
+            {
+                info = new MirrorCommonInfo();
+                info.Name = localMirror.Name;
+                info.FullName = localMirror.Type.FullName;
+                info.Type = localMirror.Type;
             }
 
-            return childInfo;
+            return info;
         }
 
-        private bool IsExpandable()
+        private bool IsExpandable(MirrorCommonInfo info)
         {
-            return true;
+            return info != null && (info.Type.IsArray || !info.Type.IsPrimitive);
+        }
+
+        private DEBUG_PROPERTY_INFO[] CreateMultiDimArrayPropertyInfos(enum_DEBUGPROP_INFO_FLAGS dwFields, ArrayMirror array)
+        {
+            var arrayValues = new DEBUG_PROPERTY_INFO[array.Length];
+
+            var dimIndex = new int[array.Rank];
+            var dimLowerBound = new int[array.Rank];
+            var dimUpperBound = new int[array.Rank];
+
+            for (int dim = 0; dim < array.Rank; dim++)
+            {
+                dimIndex[dim] = array.GetLowerBound(dim);
+                dimLowerBound[dim] = array.GetLowerBound(dim);
+                dimUpperBound[dim] = array.GetLowerBound(dim) + array.GetLength(dim) - 1;
+            }
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                var valueAtIndex = array.GetValues(i, 1).First();
+                arrayValues[i] = new MonoProperty(_stackFrame, _currentMirror, array.Type.GetElementType(), valueAtIndex, string.Join(",", dimIndex)).GetDebugPropertyInfo(dwFields);
+
+                for (int dim = array.Rank - 1; dim >= 0; dim--)
+                {
+                    if (dimIndex[dim] < dimUpperBound[dim])
+                    {
+                        dimIndex[dim]++;
+                        break;
+                    }
+                    else
+                    {
+                        dimIndex[dim] = dimLowerBound[dim];
+                    }
+                }
+            }
+
+            return arrayValues;
+        }
+
+        private enum_DBG_ATTRIB_FLAGS GetAttributeInfo(FieldAttributes attributes)
+        {
+            enum_DBG_ATTRIB_FLAGS attributeInfo = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_NONE;
+
+            if (attributes.HasFlag(FieldAttributes.Private))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PRIVATE;
+            }
+            if (attributes.HasFlag(FieldAttributes.Public))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PUBLIC;
+            }
+            if (attributes.HasFlag(FieldAttributes.Family))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PROTECTED;
+            }
+            if (attributes.HasFlag(FieldAttributes.Static))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_STORAGE_STATIC;
+            }
+
+            return attributeInfo;
+        }
+
+        private enum_DBG_ATTRIB_FLAGS GetAttributeInfo(MethodAttributes attributes)
+        {
+            enum_DBG_ATTRIB_FLAGS attributeInfo = enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_NONE;
+
+            if (attributes.HasFlag(MethodAttributes.Private))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PRIVATE;
+            }
+            if (attributes.HasFlag(MethodAttributes.Public))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PUBLIC;
+            }
+            if (attributes.HasFlag(MethodAttributes.Family))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_ACCESS_PROTECTED;
+            }
+            if (attributes.HasFlag(MethodAttributes.Static))
+            {
+                attributeInfo |= enum_DBG_ATTRIB_FLAGS.DBG_ATTRIB_STORAGE_STATIC;
+            }
+
+            return attributeInfo;
         }
     }
 
-    internal class PropertyChildInfo
+    internal class MirrorCommonInfo
     {
         public string FullName { get; set; }
         public string Name { get; set; }
-        public TypeMirror PropertyType { get; set; }
+        public TypeMirror Type { get; set; }
     }
 }

@@ -42,7 +42,8 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
             {
                 AppType = type,
                 DebugContent = File.ReadAllBytes(targetZip),
-                FileName = Client.TargetExe
+                FileName = Client.TargetExe,
+                AppHash = Client.AppHash
             });
 
             File.Delete(targetZip);
@@ -54,14 +55,42 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
             return Task.Factory.StartNew(TransferFiles);
         }
 
-        
-        public async Task WaitForAnswerAsync(int _delay=10000)
+        public void RestartDebugging()
+        {
+            communication.Send(Command.DebugLastContent, new StartDebuggingMessage
+            {
+                AppType = type,
+                DebugContent = new byte[0],
+                FileName = Client.TargetExe,
+                AppHash = Client.AppHash                
+            });
+
+            Console.WriteLine("RestartDebugging transmitting");
+        }
+
+        public async Task<bool> RestartDebuggingAsync(int delay)
+        {
+            await Task.Factory.StartNew(RestartDebugging);
+
+            try
+            {
+                var msg = await WaitForAnswerAsync(delay);
+                return (msg.Command == Command.StartedMono && ((StatusMessage)msg.Payload).Successful);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return false;
+        }
+
+        public async Task<MessageBase> WaitForAnswerAsync(int _delay=10000)
         {
             Task delay = Task.Delay(_delay);
             Task msg = await Task.WhenAny(communication.ReceiveAsync(), delay);
 
             if (msg is Task<MessageBase>)
-                return;
+                return (msg as Task<MessageBase>).Result;
 
             if (msg == delay)
                 throw new Exception("Did not receive an answer in time...");
