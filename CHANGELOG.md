@@ -11,6 +11,9 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+## 1.3.1-beta1
+
+- [x] Fix problem of GTK application(#48)
 
 ## 1.3.0
 **2017-07-04**
