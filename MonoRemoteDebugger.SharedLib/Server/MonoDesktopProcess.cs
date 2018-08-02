@@ -19,7 +19,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
             string args = GetProcessArgs();
             ProcessStartInfo procInfo = GetProcessStartInfo(workingDirectory, monoBin);
-            procInfo.Arguments = args + " \"" + _targetExe + "\"";
+            procInfo.Arguments = args + string.Format(" --config \"{0}.config\" \"{0}\"", _targetExe);
 
             _proc = Process.Start(procInfo);
             RaiseProcessStarted();
