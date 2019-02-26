@@ -8,6 +8,7 @@ namespace MonoRemoteDebugger.SharedLib
         {
             using (var zip = new Ionic.Zip.ZipFile())
             {
+                zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
                 zip.AddDirectory(directory);
                 zip.Save(targetZip);
             }

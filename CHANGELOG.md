@@ -15,6 +15,7 @@ on the official Visual Studio extension gallery.
 ## 1.4.0
 
 - [x] Support VS2019
+- [x] Support big file(#49) 
 
 ## 1.3.1-beta2
 
