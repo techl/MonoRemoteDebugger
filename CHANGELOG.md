@@ -11,6 +11,11 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+
+## 1.4.0
+
+- [x] Support VS2019
+
 ## 1.3.1-beta2
 
 - [x] Fix problem of GTK application(#48)
