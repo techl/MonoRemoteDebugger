@@ -40,7 +40,9 @@ Enjoy you debugging.
 ### Known Issue
 Not supported breakpoint on user thread.
 
-Not supported Visual Basic.
+Not supported Visual Basic, F#.
+
+Unstable on .Net Core Common Project System
 
 ### Version History
 <https://github.com/techl/MonoRemoteDebugger/blob/master/CHANGELOG.md>
