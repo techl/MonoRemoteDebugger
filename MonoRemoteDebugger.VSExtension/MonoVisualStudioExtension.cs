@@ -123,6 +123,7 @@ namespace MonoRemoteDebugger.VSExtension
         {
             try
             {
+                //TODO: Need to support Common Project System https://github.com/Microsoft/VSProjectSystem/blob/master/doc/automation/finding_CPS_in_a_VS_project.md
                 return vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value.ToString();
             }
             catch { }
