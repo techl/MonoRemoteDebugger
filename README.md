@@ -25,7 +25,7 @@ Install MonoRemoteDebugger extension. You can find also in the Visual Studio Gal
 
 Run Visual Studio 2019.
 
-Toolbar -> MonoRemoteDebugger -> Debug with Mono (remote)
+Toolbar -> Extensions -> MonoRemoteDebugger -> Debug with Mono (remote)
 
 Type remote IP Address .
 
