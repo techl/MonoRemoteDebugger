@@ -20,6 +20,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         private string directoryName;
         private string targetExe;
+        private string Arguments;
 
         public ClientSession(Socket socket)
         {
@@ -88,6 +89,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
             }
 
             targetExe = msg.FileName;
+            Arguments = msg.Arguments;
             
             directoryName = Path.Combine(tempContentDirectory, msg.AppHash);
 
@@ -137,6 +139,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
         private void StartMono(ApplicationType type)
         {
             MonoProcess proc = MonoProcess.Start(type, targetExe);
+            proc.Arguments = Arguments;
             proc.ProcessStarted += MonoProcessStarted;
             this.proc = proc.Start(directoryName);
             this.proc.EnableRaisingEvents = true;

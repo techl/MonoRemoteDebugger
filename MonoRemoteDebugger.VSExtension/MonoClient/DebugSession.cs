@@ -43,6 +43,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
                 AppType = type,
                 DebugContent = File.ReadAllBytes(targetZip),
                 FileName = Client.TargetExe,
+                Arguments = Client.Arguments,
                 AppHash = Client.AppHash
             });
 
@@ -52,7 +53,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
 
         public Task TransferFilesAsync()
         {
-            return Task.Factory.StartNew(TransferFiles);
+            return Task.Run(new Action(TransferFiles));
         }
 
         public void RestartDebugging()
@@ -62,6 +63,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
                 AppType = type,
                 DebugContent = new byte[0],
                 FileName = Client.TargetExe,
+                Arguments = Client.Arguments,
                 AppHash = Client.AppHash                
             });
 
@@ -70,7 +72,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
 
         public async Task<bool> RestartDebuggingAsync(int delay)
         {
-            await Task.Factory.StartNew(RestartDebugging);
+            RestartDebugging();
 
             try
             {
@@ -90,7 +92,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
             Task msg = await Task.WhenAny(communication.ReceiveAsync(), delay);
 
             if (msg is Task<MessageBase>)
-                return (msg as Task<MessageBase>).Result;
+                return await (msg as Task<MessageBase>);
 
             if (msg == delay)
                 throw new Exception("Did not receive an answer in time...");

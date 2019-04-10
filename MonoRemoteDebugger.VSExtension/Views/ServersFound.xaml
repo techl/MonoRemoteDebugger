@@ -46,7 +46,7 @@
             <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="3" Text="{Binding AwaitTimeout}" />
             <TextBlock Grid.Column="2" Text="miliseconds" VerticalAlignment="Center" Margin="3" />
         </Grid>
-        
+
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -55,7 +55,7 @@
             <TextBlock Text="MonoRemoteDebugger Server Port:" VerticalAlignment="Center" Margin="3" />
             <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="3" Text="{Binding ServerPort, Mode=TwoWay}" />
         </Grid>
-        
+
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -64,19 +64,15 @@
             <TextBlock Text="Debugger Agent Port:" VerticalAlignment="Center" Margin="3" />
             <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="3" Text="{Binding DebuggerAgentPort, Mode=TwoWay}" />
         </Grid>
-        
-        <Grid Grid.Row="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Text="Remote-IP:" VerticalAlignment="Center" Margin="3" />
-            <TextBox Grid.Column="1" VerticalAlignment="Center" Margin="3" Text="{Binding ManualIp}" />
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button MinWidth="100" Margin="3" Click="Select">Connect</Button>
-                <Button MinWidth="100" Margin="3" Click="Cancel">Cancel</Button>
+        <StackPanel Grid.Row="5">
+            <StackPanel Orientation="Horizontal" >
+                <TextBlock Text="Remote-IP:" VerticalAlignment="Center" Margin="3" />
+                <TextBox VerticalAlignment="Center" Margin="3" Text="{Binding ManualIp}" Width="100" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button MinWidth="100" Margin="3" Click="Connect" IsDefault="True">Connect</Button>
+                    <Button MinWidth="100" Margin="3" Click="Cancel">Cancel</Button>
+                </StackPanel>
             </StackPanel>
-        </Grid>
+        </StackPanel>
     </Grid>
 </Window>

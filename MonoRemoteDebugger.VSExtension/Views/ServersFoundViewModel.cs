@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
+﻿using MonoRemoteDebugger.SharedLib;
 using MonoRemoteDebugger.VSExtension.MonoClient;
 using MonoRemoteDebugger.VSExtension.Settings;
-using System.Threading.Tasks;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
-using MonoRemoteDebugger.SharedLib;
 
 namespace MonoRemoteDebugger.VSExtension.Views
 {
@@ -21,7 +21,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
             UserSettings settings = UserSettingsManager.Instance.Load();
             ManualIp = settings.LastIp;
             AwaitTimeout = settings.LastTimeout;
-            LookupServers(cts.Token);
+            var task = LookupServersAsync(cts.Token);
         }
 
         public ObservableCollection<MonoServerInformation> Servers { get; set; }
@@ -53,7 +53,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
             }
         }
 
-        private async void LookupServers(CancellationToken token)
+        private async Task LookupServersAsync(CancellationToken token)
         {
             var discovery = new MonoServerDiscovery();
 
@@ -62,7 +62,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
                 while (!token.IsCancellationRequested)
                 {
                     token.ThrowIfCancellationRequested();
-                    MonoServerInformation server = await discovery.SearchServer(token);
+                    MonoServerInformation server = await discovery.SearchServerAsync(token);
                     if (server != null)
                     {
                         MonoServerInformation exists = Servers.FirstOrDefault(x => Equals(x.IpAddress, server.IpAddress));
@@ -81,9 +81,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
                         await Task.Delay(1000);
                     }
 
-                    foreach (
-                        MonoServerInformation deadServer in
-                            Servers.Where(x => ((DateTime.Now - x.LastMessage).TotalSeconds > 5)).ToList())
+                    foreach (MonoServerInformation deadServer in Servers.Where(x => ((DateTime.Now - x.LastMessage).TotalSeconds > 5)).ToList())
                         Servers.Remove(deadServer);
                 }
             }

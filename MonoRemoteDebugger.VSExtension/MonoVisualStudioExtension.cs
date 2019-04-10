@@ -35,12 +35,6 @@ namespace MonoRemoteDebugger.VSExtension
             sb.Build(true);
         }
 
-        internal string GetStartupAssemblyPath()
-        {
-            Project startupProject = GetStartupProject();
-            return GetAssemblyPath(startupProject);
-        }
-
         private Project GetStartupProject()
         {
             var sb = (SolutionBuild2) _dte.Solution.SolutionBuild;
@@ -125,22 +119,33 @@ namespace MonoRemoteDebugger.VSExtension
             return assemblyPath;
         }
 
-
-        internal async Task AttachDebugger(string ipAddress, int timeout=10000)
+        internal string GetArguments(Project vsProject)
         {
-            string path = GetStartupAssemblyPath();
+            try
+            {
+                return vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value.ToString();
+            }
+            catch { }
+
+            return null;
+        }
+
+        internal async Task AttachDebuggerAsync(string ipAddress, int timeout=10000)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            Project startupProject = GetStartupProject();
+            string path = GetAssemblyPath(startupProject);
+            string arguments = GetArguments(startupProject);
             string targetExe = Path.GetFileName(path);
             string outputDirectory = Path.GetDirectoryName(path);
             string appHash = ComputeHash(path);
 
-            Project startup = GetStartupProject();
-
-            bool isWeb = ((object[]) startup.ExtenderNames).Any(x => x.ToString() == "WebApplication");
+            bool isWeb = ((object[])startupProject.ExtenderNames).Any(x => x.ToString() == "WebApplication");
             ApplicationType appType = isWeb ? ApplicationType.Webapplication : ApplicationType.Desktopapplication;
             if (appType == ApplicationType.Webapplication)
                 outputDirectory += @"\..\..\";
 
-            var client = new DebugClient(appType, targetExe, outputDirectory, appHash);
+            var client = new DebugClient(appType, targetExe, arguments, outputDirectory, appHash);
             DebugSession session = await client.ConnectToServerAsync(ipAddress);
             var debugSessionStarted = await session.RestartDebuggingAsync(timeout);
 

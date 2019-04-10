@@ -10,15 +10,17 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
     {
         private readonly ApplicationType _type;
 
-        public DebugClient(ApplicationType type, string targetExe, string outputDirectory, string appHash)
+        public DebugClient(ApplicationType type, string targetExe, string arguments, string outputDirectory, string appHash)
         {
             _type = type;
             TargetExe = targetExe;
+            Arguments = arguments;
             OutputDirectory = outputDirectory;
             AppHash = appHash;
         }
 
         public string TargetExe { get; set; }
+        public string Arguments { get; set; }
         public string OutputDirectory { get; set; }
         public string AppHash { get; set; }
         public IPAddress CurrentServer { get; private set; }

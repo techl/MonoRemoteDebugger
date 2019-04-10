@@ -11,7 +11,7 @@ namespace MonoRemoteDebugger.VSExtension
         public const string Name = "MonoRemoteDebugger";
         public const string Description = @"MonoRemoteDebugger";
         public const string Language = "en-US";
-        public const string Version = "1.4.0";
+        public const string Version = "1.5.0";
         public const string Author = "Techl.com";
         public const string Tags = "mono, debugger, remote";
     }

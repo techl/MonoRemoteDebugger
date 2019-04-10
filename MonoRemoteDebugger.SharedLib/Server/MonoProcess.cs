@@ -10,6 +10,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
 {
     public abstract class MonoProcess
     {
+        public string Arguments { get; set; }
         protected Process _proc;
         public event EventHandler ProcessStarted;
         internal abstract Process Start(string workingDirectory);
@@ -23,7 +24,6 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         protected string GetProcessArgs()
         {
-            //IPAddress ip = GetLocalIp();
             IPAddress ip = IPAddress.Any;
             string args =
                 string.Format(

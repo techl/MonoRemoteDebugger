@@ -20,28 +20,30 @@ using MonoRemoteDebugger.VSExtension.Views;
 using NLog;
 using Process = System.Diagnostics.Process;
 using Microsoft.MIDebugEngine;
+using System.Threading;
+using Task = System.Threading.Tasks.Task;
 
 namespace MonoRemoteDebugger.VSExtension
 {
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
     [Guid(PackageGuids.guidMonoDebugger_VS2013PkgString)]
-    public sealed class VSPackage : Package, IDisposable
+    public sealed class VSPackage : AsyncPackage, IDisposable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private MonoVisualStudioExtension monoExtension;
         private MonoDebugServer server = new MonoDebugServer();
 
-        protected override void Initialize()
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             var settingsManager = new ShellSettingsManager(this);
             var configurationSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
             UserSettingsManager.Initialize(configurationSettingsStore);
             MonoLogger.Setup();
             base.Initialize();
-            var dte = (DTE)GetService(typeof(DTE));
+            var dte = await GetServiceAsync(typeof(DTE)) as DTE;
             monoExtension = new MonoVisualStudioExtension(dte);
             TryRegisterAssembly();
 
@@ -51,8 +53,9 @@ namespace MonoRemoteDebugger.VSExtension
                 Source = new Uri("/MonoRemoteDebugger.VSExtension;component/Resources/Resources.xaml", UriKind.Relative)
             });
 
-            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var mcs = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             InstallMenu(mcs);
+
         }
 
         private void InstallMenu(OleMenuCommandService mcs)
@@ -144,12 +147,7 @@ namespace MonoRemoteDebugger.VSExtension
             }
         }
 
-        private void DebugLocalClicked(object sender, EventArgs e)
-        {
-            StartLocalServer();
-        }
-
-        private async void StartLocalServer()
+        private async void DebugLocalClicked(object sender, EventArgs e)
         {
             try
             {
@@ -164,7 +162,7 @@ namespace MonoRemoteDebugger.VSExtension
                 using (server = new MonoDebugServer())
                 {
                     server.Start();
-                    await monoExtension.AttachDebugger(MonoProcess.GetLocalIp().ToString());
+                    await monoExtension.AttachDebuggerAsync(MonoProcess.GetLocalIp().ToString());
                 }
             }
             catch (Exception ex)
@@ -176,12 +174,7 @@ namespace MonoRemoteDebugger.VSExtension
             }
         }
 
-        private void DebugRemoteClicked(object sender, EventArgs e)
-        {
-            StartSearching();
-        }
-
-        private async void StartSearching()
+        private async void DebugRemoteClicked(object sender, EventArgs e)
         {
             var dlg = new ServersFound();
 
@@ -192,9 +185,9 @@ namespace MonoRemoteDebugger.VSExtension
                     int timeout = dlg.ViewModel.AwaitTimeout;
                     monoExtension.BuildSolution();
                     if (dlg.ViewModel.SelectedServer != null)
-                        await monoExtension.AttachDebugger(dlg.ViewModel.SelectedServer.IpAddress.ToString(), timeout);
+                        await monoExtension.AttachDebuggerAsync(dlg.ViewModel.SelectedServer.IpAddress.ToString(), timeout);
                     else if (!string.IsNullOrWhiteSpace(dlg.ViewModel.ManualIp))
-                        await monoExtension.AttachDebugger(dlg.ViewModel.ManualIp, timeout);
+                        await monoExtension.AttachDebuggerAsync(dlg.ViewModel.ManualIp, timeout);
                 }
                 catch (Exception ex)
                 {
@@ -235,6 +228,5 @@ namespace MonoRemoteDebugger.VSExtension
             Dispose(false);
         }
         #endregion
-
     }
 }

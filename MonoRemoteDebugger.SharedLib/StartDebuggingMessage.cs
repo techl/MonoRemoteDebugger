@@ -9,6 +9,9 @@ namespace MonoRemoteDebugger.SharedLib
         public string FileName { get; set; }
 
         [DataMember]
+        public string Arguments { get; set; }
+
+        [DataMember]
         public ApplicationType AppType { get; set; }
 
         [DataMember]

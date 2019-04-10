@@ -19,7 +19,7 @@ namespace MonoRemoteDebugger.VSExtension.Views
 
         public ServersFoundViewModel ViewModel { get; set; }
 
-        private void Select(object sender, RoutedEventArgs e)
+        private void Connect(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
         }

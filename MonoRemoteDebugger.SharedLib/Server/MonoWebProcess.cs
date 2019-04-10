@@ -15,6 +15,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
             string args = GetProcessArgs();
             ProcessStartInfo procInfo = GetProcessStartInfo(workingDirectory, monoBin);
 
+            procInfo.Arguments = Arguments;
             procInfo.CreateNoWindow = true;
             procInfo.UseShellExecute = false;
             procInfo.EnvironmentVariables["MONO_OPTIONS"] = args;

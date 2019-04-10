@@ -10,7 +10,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
 {
     public class MonoServerDiscovery
     {
-        public async Task<MonoServerInformation> SearchServer(CancellationToken token)
+        public async Task<MonoServerInformation> SearchServerAsync(CancellationToken token)
         {
             using (var udp = new UdpClient(new IPEndPoint(IPAddress.Any, 15000)))
             {
@@ -18,7 +18,7 @@ namespace MonoRemoteDebugger.VSExtension.MonoClient
                 var task = result as Task<UdpReceiveResult>;
                 if (task != null)
                 {
-                    UdpReceiveResult udpResult = task.Result;
+                    UdpReceiveResult udpResult = await task;
                     string msg = Encoding.Default.GetString(udpResult.Buffer);
                     return new MonoServerInformation { Message = msg, IpAddress = udpResult.RemoteEndPoint.Address };
                 }

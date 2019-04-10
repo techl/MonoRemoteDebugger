@@ -11,6 +11,12 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+## 1.5.0
+
+- [x] Change to support AsyncPackage for VS2019
+- [x] Support Start Command line arguments
+- [x] Remove project warnings
+- [x] Support Enter key for connecting on connection dialog
 
 ## 1.4.0
 
