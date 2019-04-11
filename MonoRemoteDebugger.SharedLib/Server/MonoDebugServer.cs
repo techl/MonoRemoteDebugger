@@ -1,4 +1,5 @@
 ﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -16,11 +17,6 @@ namespace MonoRemoteDebugger.SharedLib.Server
 
         private Task listeningTask;
         private TcpListener tcp;
-
-        public void Dispose()
-        {
-            Stop();
-        }
 
         public void Start()
         {
@@ -66,7 +62,7 @@ namespace MonoRemoteDebugger.SharedLib.Server
                     if (!Task.WaitAll(new Task[] { listeningTask }, 5000))
                         logger.Error("listeningTask timeout!!!");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.Error(ex.ToString());
                 }
@@ -111,5 +107,35 @@ namespace MonoRemoteDebugger.SharedLib.Server
         {
             listeningTask.Wait();
         }
+
+        #region IDisposable Members
+        protected bool disposed = false;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+                return;
+
+            if (disposing)
+            {
+                //Dispose managed resources
+                Stop();
+            }
+
+            //Dispose unmanaged resources here.
+
+            disposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~MonoDebugServer()
+        {
+            Dispose(false);
+        }
+        #endregion
     }
 }

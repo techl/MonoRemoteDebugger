@@ -1,12 +1,7 @@
-﻿using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.MIDebugEngine;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -14,13 +9,18 @@ using Microsoft.VisualStudio.Shell.Settings;
 using Microsoft.Win32;
 using MonoRemoteDebugger.SharedLib;
 using MonoRemoteDebugger.SharedLib.Server;
-using MonoRemoteDebugger.Debugger;
 using MonoRemoteDebugger.VSExtension.Settings;
 using MonoRemoteDebugger.VSExtension.Views;
 using NLog;
-using Process = System.Diagnostics.Process;
-using Microsoft.MIDebugEngine;
+using System;
+using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
+using Process = System.Diagnostics.Process;
 using Task = System.Threading.Tasks.Task;
 
 namespace MonoRemoteDebugger.VSExtension
@@ -28,9 +28,9 @@ namespace MonoRemoteDebugger.VSExtension
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideAutoLoad("f1536ef8-92ec-443c-9ed7-fdadf150da82")]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
     [Guid(PackageGuids.guidMonoDebugger_VS2013PkgString)]
-    public sealed class VSPackage : AsyncPackage, IDisposable
+    public sealed class VSPackage : AsyncPackage
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private MonoVisualStudioExtension monoExtension;
@@ -62,20 +62,18 @@ namespace MonoRemoteDebugger.VSExtension
         {
             if (mcs != null)
             {
-                var debugLocally = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet, (int)PackageIds.cmdLocalDebugCode);
+                var debugLocally = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet, PackageIds.cmdLocalDebugCode);
                 var localCmd = new OleMenuCommand(DebugLocalClicked, debugLocally);
                 localCmd.BeforeQueryStatus += cmd_BeforeQueryStatus;
                 mcs.AddCommand(localCmd);
 
 
-                var menuCommandID = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet,
-                    (int)PackageIds.cmdRemodeDebugCode);
+                var menuCommandID = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet, PackageIds.cmdRemodeDebugCode);
                 var cmd = new OleMenuCommand(DebugRemoteClicked, menuCommandID);
                 cmd.BeforeQueryStatus += cmd_BeforeQueryStatus;
                 mcs.AddCommand(cmd);
 
-                var cmdOpenLogFileId = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet,
-                    (int)PackageIds.cmdOpenLogFile);
+                var cmdOpenLogFileId = new CommandID(PackageGuids.guidMonoDebugger_VS2013CmdSet, PackageIds.cmdOpenLogFile);
                 var openCmd = new OleMenuCommand(OpenLogFile, cmdOpenLogFileId);
                 openCmd.BeforeQueryStatus += (o, e) => openCmd.Enabled = File.Exists(MonoLogger.LoggerPath);
                 mcs.AddCommand(openCmd);
@@ -196,37 +194,5 @@ namespace MonoRemoteDebugger.VSExtension
                 }
             }
         }
-
-        #region IDisposable Members
-        private bool disposed = false;
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (this.disposed)
-                return;
-
-            if (disposing)
-            {
-                //Dispose managed resources
-                this.server.Dispose();
-            }
-
-            //Dispose unmanaged resources here.
-
-            disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~VSPackage()
-        {
-            Dispose(false);
-        }
-        #endregion
     }
 }
