@@ -76,8 +76,12 @@ namespace MonoRemoteDebugger.SharedLib.Server
             }
             finally
             {
-                if (proc != null && !proc.HasExited)
-                    proc.Kill();
+                try
+                {
+                    if (proc != null && !proc.HasExited)
+                        proc.Kill();
+                }
+                catch { }
             }
         }
         

@@ -28,7 +28,7 @@ namespace MonoRemoteDebugger.VSExtension
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", Vsix.Version, IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
     [Guid(PackageGuids.guidMonoDebugger_VS2013PkgString)]
     public sealed class VSPackage : AsyncPackage
     {

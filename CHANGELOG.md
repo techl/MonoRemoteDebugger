@@ -11,6 +11,12 @@ download in the
 
 These are the changes to each version that has been released
 on the official Visual Studio extension gallery.
+
+## 1.5.2
+
+- [x] Fix Server bug on debug exit.
+- [x] BackgroundLoad
+
 ## 1.5.1
 
 - [x] Fix VS crash on exit(#51)
