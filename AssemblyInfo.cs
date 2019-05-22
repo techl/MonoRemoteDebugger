@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Techl.com")]
 [assembly: AssemblyProduct("MonoRemoteDebugger")]
-[assembly: AssemblyCopyright("Copyright 2015 Techl.com")]
+[assembly: AssemblyCopyright("Copyright 2019 Techl.com")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

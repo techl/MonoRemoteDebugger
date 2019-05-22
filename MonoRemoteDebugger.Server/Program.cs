@@ -1,7 +1,7 @@
 ﻿using MonoRemoteDebugger.SharedLib;
 using MonoRemoteDebugger.SharedLib.Server;
 using System;
-using Techl.Reflection;
+using System.Reflection;
 
 namespace MonoRemoteDebugger.Server
 {
@@ -9,7 +9,7 @@ namespace MonoRemoteDebugger.Server
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine($"MonoRemoteDebugger.Server v{VersionHelper.GetVersion()}");
+            Console.WriteLine($"MonoRemoteDebugger.Server v{Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}");
 
             MonoLogger.Setup();
 
