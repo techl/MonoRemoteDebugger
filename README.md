@@ -1,7 +1,7 @@
 MonoRemoteDebugger
 ============
 
-MonoRemoteDebugger enables linux remote debugging using Visual Studio 2015.
+MonoRemoteDebugger enables linux remote debugging using Visual Studio 2015-2019
 
 [![Build status](https://ci.appveyor.com/api/projects/status/y25a6ymkwrt268s1?svg=true)](https://ci.appveyor.com/project/techcap/monoremotedebugger)
 
