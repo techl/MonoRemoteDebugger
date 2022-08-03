@@ -9,12 +9,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MonoRemoteDebugger.Debugger</RootNamespace>
     <AssemblyName>MonoRemoteDebugger.Debugger</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -186,7 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoRemoteDebugger.SharedLib\MonoRemoteDebugger.SharedLib.csproj">
-      <Project>{FE76AEE5-C4E3-45ED-AA18-29DF82AB405C}</Project>
+      <Project>{fe76aee5-c4e3-45ed-aa18-29df82ab405c}</Project>
       <Name>MonoRemoteDebugger.SharedLib</Name>
     </ProjectReference>
   </ItemGroup>
